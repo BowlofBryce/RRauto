@@ -1,4 +1,3 @@
-import { motion } from 'motion/react'
 import type { ReactNode } from 'react'
 
 interface Props {
@@ -9,17 +8,12 @@ interface Props {
 
 export function PageHeader({ title, description, actions }: Props) {
   return (
-    <motion.div
-      initial={{ opacity: 0, y: -6 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.2 }}
-      className="flex items-start justify-between pb-6"
-    >
+    <div className="flex items-center justify-between pb-7">
       <div>
-        <h1 className="text-[17px] font-semibold text-1 tracking-tight">{title}</h1>
+        <h1 className="text-[18px] font-semibold text-1 tracking-[-0.3px]">{title}</h1>
         {description && <p className="text-[13px] text-3 mt-0.5">{description}</p>}
       </div>
       {actions && <div className="flex items-center gap-2">{actions}</div>}
-    </motion.div>
+    </div>
   )
 }

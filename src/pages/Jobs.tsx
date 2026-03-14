@@ -18,20 +18,17 @@ import type { Contact } from '../types/crm.types'
 
 type StatusKey = 'completed' | 'scheduled' | 'pending' | 'cancelled' | 'in_progress'
 const statusCfg: Record<StatusKey, { variant: 'success' | 'warning' | 'neutral' | 'danger'; label: string }> = {
-  completed: { variant: 'success', label: 'Completed' },
-  scheduled: { variant: 'warning', label: 'Scheduled' },
-  pending: { variant: 'neutral', label: 'Pending' },
-  cancelled: { variant: 'danger', label: 'Cancelled' },
+  completed:   { variant: 'success', label: 'Completed' },
+  scheduled:   { variant: 'warning', label: 'Scheduled' },
+  pending:     { variant: 'neutral', label: 'Pending' },
+  cancelled:   { variant: 'danger',  label: 'Cancelled' },
   in_progress: { variant: 'warning', label: 'In Progress' },
 }
 
 const rowV = {
   hidden: { opacity: 0, y: 4 },
-  visible: (i: number) => ({
-    opacity: 1, y: 0,
-    transition: { delay: i * 0.03, type: 'spring' as const, stiffness: 300, damping: 28 },
-  }),
-  exit: { opacity: 0, x: -8, transition: { duration: 0.14 } },
+  visible: (i: number) => ({ opacity: 1, y: 0, transition: { delay: i * 0.03, type: 'spring' as const, stiffness: 300, damping: 28 } }),
+  exit: { opacity: 0, transition: { duration: 0.12 } },
 }
 
 export function Jobs() {
@@ -77,32 +74,31 @@ export function Jobs() {
   }
 
   return (
-    <div className="max-w-5xl mx-auto">
+    <div>
       <PageHeader
         title="Jobs"
         description={`${jobs.length} total`}
         actions={
           <Button variant="primary" size="md" onClick={() => setAddOpen(true)}>
-            <Plus size={14} /> New Job
+            <Plus size={13} /> New Job
           </Button>
         }
       />
 
-      <div className="bg-raised border border-app rounded-xl overflow-hidden">
+      <div className="card overflow-hidden">
         {loading ? (
           <TableSkeleton rows={5} />
         ) : jobs.length === 0 ? (
           <EmptyState icon={Wrench} title="No jobs yet" description="Schedule your first job" action={{ label: 'New Job', onClick: () => setAddOpen(true) }} />
         ) : (
           <>
-            <div className="grid grid-cols-[40px_1fr_130px_80px_140px] gap-4 px-5 py-2.5 border-b border-app">
-              <div />
-              <div className="text-[10px] font-semibold text-4 uppercase tracking-wider">Contact</div>
-              <div className="text-[10px] font-semibold text-4 uppercase tracking-wider">Date</div>
-              <div className="text-[10px] font-semibold text-4 uppercase tracking-wider text-right">Price</div>
-              <div className="text-[10px] font-semibold text-4 uppercase tracking-wider">Status</div>
+            <div className="grid grid-cols-[1fr_140px_80px_160px] gap-4 px-5 py-2.5" style={{ borderBottom: '1px solid var(--border)' }}>
+              <div className="text-[11px] font-semibold text-4 uppercase tracking-wider">Contact & Service</div>
+              <div className="text-[11px] font-semibold text-4 uppercase tracking-wider">Date</div>
+              <div className="text-[11px] font-semibold text-4 uppercase tracking-wider text-right">Price</div>
+              <div className="text-[11px] font-semibold text-4 uppercase tracking-wider">Status</div>
             </div>
-            <motion.ul layout className="divide-y divide-app">
+            <motion.ul layout className="divide-app">
               <AnimatePresence initial={false}>
                 {jobs.map((job, i) => {
                   const cfg = statusCfg[job.status as StatusKey] ?? { variant: 'neutral' as const, label: job.status }
@@ -115,33 +111,35 @@ export function Jobs() {
                       animate="visible"
                       exit="exit"
                       layout
-                      className="grid grid-cols-[40px_1fr_130px_80px_140px] gap-4 items-center px-5 py-3.5 row-hover transition-colors"
+                      className="grid grid-cols-[1fr_140px_80px_160px] gap-4 items-center px-5 py-3.5 row-hover transition-colors"
                     >
-                      <Avatar name={job.contacts.name} size="sm" />
-                      <div className="min-w-0">
-                        <p className="text-sm font-medium text-1 truncate">{job.contacts.name}</p>
-                        <p className="text-xs text-3 truncate flex items-center gap-1 mt-0.5">
-                          <Wrench size={10} />{job.service_type}
-                        </p>
+                      <div className="flex items-center gap-3 min-w-0">
+                        <Avatar name={job.contacts.name} size="sm" />
+                        <div className="min-w-0">
+                          <p className="text-[13px] font-medium text-1 truncate">{job.contacts.name}</p>
+                          <p className="text-[12px] text-3 truncate mt-0.5 flex items-center gap-1">
+                            <Wrench size={9} />{job.service_type}
+                          </p>
+                        </div>
                       </div>
                       <div>
                         {job.scheduled_date ? (
-                          <span className="flex items-center gap-1 text-xs text-2">
+                          <span className="flex items-center gap-1 text-[12px] text-2">
                             <Calendar size={10} />{formatDate(job.scheduled_date)}
                           </span>
                         ) : (
-                          <span className="text-xs text-4">Unscheduled</span>
+                          <span className="text-[12px] text-4">Unscheduled</span>
                         )}
                       </div>
                       <div className="text-right">
-                        <span className="text-sm font-medium text-1 tabular-nums">{formatCurrency(job.price)}</span>
+                        <span className="text-[13px] font-medium text-1 tabular-nums">{formatCurrency(job.price)}</span>
                       </div>
                       <div className="flex items-center gap-2">
                         <Badge variant={cfg.variant}>{cfg.label}</Badge>
                         <select
                           value={job.status}
                           onChange={(e) => handleStatus(job.id, e.target.value)}
-                          className="text-xs bg-transparent border-0 focus:outline-none text-4 cursor-pointer"
+                          className="text-[11px] bg-transparent border-0 focus:outline-none text-4 cursor-pointer"
                         >
                           {Object.entries(statusCfg).map(([k, v]) => (
                             <option key={k} value={k}>{v.label}</option>
@@ -160,9 +158,9 @@ export function Jobs() {
       <Modal open={addOpen} onClose={() => setAddOpen(false)} title="New Job">
         <div className="space-y-3">
           <div className="flex flex-col gap-1.5">
-            <label className="text-xs font-medium text-2">Contact *</label>
+            <label className="text-[12px] font-medium text-3">Contact *</label>
             <select value={form.contact_id} onChange={(e) => setForm({ ...form, contact_id: e.target.value })}
-              className="input-base h-8 px-3 rounded-lg text-[13px] focus:outline-none">
+              className="input-base h-8 px-3 rounded-lg text-[13px]">
               <option value="">Select contact...</option>
               {contacts.map((c) => <option key={c.id} value={c.id}>{c.name}</option>)}
             </select>
@@ -170,9 +168,9 @@ export function Jobs() {
           <Input label="Service Type *" value={form.service_type} onChange={(e) => setForm({ ...form, service_type: e.target.value })} placeholder="e.g. Lawn Mowing" />
           <div className="grid grid-cols-2 gap-3">
             <Input label="Scheduled Date" type="datetime-local" value={form.scheduled_date} onChange={(e) => setForm({ ...form, scheduled_date: e.target.value })} />
-            <Input label="Price" type="number" value={form.price} onChange={(e) => setForm({ ...form, price: e.target.value })} placeholder="0" />
+            <Input label="Price" type="number" value={form.price} onChange={(e) => setForm({ ...form, price: e.target.value })} placeholder="0.00" />
           </div>
-          <div className="flex justify-end gap-2 pt-1">
+          <div className="flex justify-end gap-2 pt-2">
             <Button variant="ghost" onClick={() => setAddOpen(false)}>Cancel</Button>
             <Button variant="primary" loading={saving} onClick={handleCreate}>Create Job</Button>
           </div>

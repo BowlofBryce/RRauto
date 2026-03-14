@@ -18,19 +18,16 @@ import type { Contact } from '../types/crm.types'
 
 type StatusKey = 'draft' | 'sent' | 'accepted' | 'declined'
 const statusCfg: Record<StatusKey, { variant: 'success' | 'warning' | 'neutral' | 'danger'; label: string }> = {
-  draft: { variant: 'neutral', label: 'Draft' },
-  sent: { variant: 'warning', label: 'Sent' },
+  draft:    { variant: 'neutral', label: 'Draft' },
+  sent:     { variant: 'warning', label: 'Sent' },
   accepted: { variant: 'success', label: 'Accepted' },
-  declined: { variant: 'danger', label: 'Declined' },
+  declined: { variant: 'danger',  label: 'Declined' },
 }
 
 const rowV = {
   hidden: { opacity: 0, y: 4 },
-  visible: (i: number) => ({
-    opacity: 1, y: 0,
-    transition: { delay: i * 0.03, type: 'spring' as const, stiffness: 300, damping: 28 },
-  }),
-  exit: { opacity: 0, x: -8, transition: { duration: 0.14 } },
+  visible: (i: number) => ({ opacity: 1, y: 0, transition: { delay: i * 0.03, type: 'spring' as const, stiffness: 300, damping: 28 } }),
+  exit: { opacity: 0, transition: { duration: 0.12 } },
 }
 
 export function Quotes() {
@@ -76,33 +73,32 @@ export function Quotes() {
   const totalAccepted = quotes.filter((q) => q.status === 'accepted').reduce((s, q) => s + q.amount, 0)
 
   return (
-    <div className="max-w-5xl mx-auto">
+    <div>
       <PageHeader
         title="Quotes"
-        description={`${formatCurrency(totalAccepted)} accepted`}
+        description={totalAccepted > 0 ? `${formatCurrency(totalAccepted)} accepted` : `${quotes.length} total`}
         actions={
           <Button variant="primary" size="md" onClick={() => setAddOpen(true)}>
-            <Plus size={14} /> New Quote
+            <Plus size={13} /> New Quote
           </Button>
         }
       />
 
-      <div className="bg-raised border border-app rounded-xl overflow-hidden">
+      <div className="card overflow-hidden">
         {loading ? (
           <TableSkeleton rows={5} />
         ) : quotes.length === 0 ? (
           <EmptyState icon={FileText} title="No quotes yet" description="Create your first quote" action={{ label: 'New Quote', onClick: () => setAddOpen(true) }} />
         ) : (
           <>
-            <div className="grid grid-cols-[40px_1fr_100px_120px_80px_80px] gap-4 px-5 py-2.5 border-b border-app">
-              <div />
-              <div className="text-[10px] font-semibold text-4 uppercase tracking-wider">Contact</div>
-              <div className="text-[10px] font-semibold text-4 uppercase tracking-wider text-right">Amount</div>
-              <div className="text-[10px] font-semibold text-4 uppercase tracking-wider">Sent</div>
-              <div className="text-[10px] font-semibold text-4 uppercase tracking-wider">Status</div>
+            <div className="grid grid-cols-[1fr_100px_130px_80px_72px] gap-4 px-5 py-2.5" style={{ borderBottom: '1px solid var(--border)' }}>
+              <div className="text-[11px] font-semibold text-4 uppercase tracking-wider">Contact</div>
+              <div className="text-[11px] font-semibold text-4 uppercase tracking-wider text-right">Amount</div>
+              <div className="text-[11px] font-semibold text-4 uppercase tracking-wider">Sent</div>
+              <div className="text-[11px] font-semibold text-4 uppercase tracking-wider">Status</div>
               <div />
             </div>
-            <motion.ul layout className="divide-y divide-app">
+            <motion.ul layout className="divide-app">
               <AnimatePresence initial={false}>
                 {quotes.map((q, i) => {
                   const cfg = statusCfg[q.status as StatusKey] ?? { variant: 'neutral' as const, label: q.status }
@@ -115,31 +111,33 @@ export function Quotes() {
                       animate="visible"
                       exit="exit"
                       layout
-                      className="grid grid-cols-[40px_1fr_100px_120px_80px_80px] gap-4 items-center px-5 py-3.5 row-hover transition-colors"
+                      className="grid grid-cols-[1fr_100px_130px_80px_72px] gap-4 items-center px-5 py-3.5 row-hover transition-colors"
                     >
-                      <Avatar name={q.contacts.name} size="sm" />
-                      <div className="min-w-0">
-                        <p className="text-sm font-medium text-1 truncate">{q.contacts.name}</p>
-                        {q.notes && <p className="text-xs text-3 truncate mt-0.5">{q.notes}</p>}
+                      <div className="flex items-center gap-3 min-w-0">
+                        <Avatar name={q.contacts.name} size="sm" />
+                        <div className="min-w-0">
+                          <p className="text-[13px] font-medium text-1 truncate">{q.contacts.name}</p>
+                          {q.notes && <p className="text-[12px] text-3 truncate mt-0.5">{q.notes}</p>}
+                        </div>
                       </div>
                       <div className="text-right">
-                        <span className="text-sm font-semibold text-1 tabular-nums">{formatCurrency(q.amount)}</span>
+                        <span className="text-[13px] font-semibold text-1 tabular-nums">{formatCurrency(q.amount)}</span>
                       </div>
                       <div>
-                        <span className="text-xs text-3">{q.sent_date ? formatDate(q.sent_date) : '—'}</span>
+                        <span className="text-[12px] text-3">{q.sent_date ? formatDate(q.sent_date) : '—'}</span>
                       </div>
                       <div>
                         <Badge variant={cfg.variant}>{cfg.label}</Badge>
                       </div>
                       <div className="flex justify-end">
                         {q.status === 'draft' && (
-                          <Button variant="ghost" size="sm" onClick={() => handleSend(q.id)}>
-                            <Send size={11} />Send
+                          <Button variant="ghost" size="xs" onClick={() => handleSend(q.id)}>
+                            <Send size={10} /> Send
                           </Button>
                         )}
                         {q.status === 'sent' && (
-                          <Button variant="ghost" size="sm" onClick={() => handleAccept(q.id)}>
-                            <CheckCircle size={11} />Accept
+                          <Button variant="ghost" size="xs" onClick={() => handleAccept(q.id)}>
+                            <CheckCircle size={10} /> Accept
                           </Button>
                         )}
                       </div>
@@ -155,20 +153,20 @@ export function Quotes() {
       <Modal open={addOpen} onClose={() => setAddOpen(false)} title="New Quote">
         <div className="space-y-3">
           <div className="flex flex-col gap-1.5">
-            <label className="text-xs font-medium text-2">Contact *</label>
+            <label className="text-[12px] font-medium text-3">Contact *</label>
             <select value={form.contact_id} onChange={(e) => setForm({ ...form, contact_id: e.target.value })}
-              className="input-base h-8 px-3 rounded-lg text-[13px] focus:outline-none">
+              className="input-base h-8 px-3 rounded-lg text-[13px]">
               <option value="">Select contact...</option>
               {contacts.map((c) => <option key={c.id} value={c.id}>{c.name}</option>)}
             </select>
           </div>
           <Input label="Amount *" type="number" value={form.amount} onChange={(e) => setForm({ ...form, amount: e.target.value })} placeholder="0.00" />
           <div className="flex flex-col gap-1.5">
-            <label className="text-xs font-medium text-2">Notes</label>
+            <label className="text-[12px] font-medium text-3">Notes</label>
             <textarea value={form.notes} onChange={(e) => setForm({ ...form, notes: e.target.value })} rows={2}
-              className="input-base px-3 py-2 rounded-lg text-[13px] resize-none focus:outline-none" />
+              className="input-base px-3 py-2 rounded-lg text-[13px] resize-none" />
           </div>
-          <div className="flex justify-end gap-2 pt-1">
+          <div className="flex justify-end gap-2 pt-2">
             <Button variant="ghost" onClick={() => setAddOpen(false)}>Cancel</Button>
             <Button variant="primary" loading={saving} onClick={handleCreate}>Create Quote</Button>
           </div>

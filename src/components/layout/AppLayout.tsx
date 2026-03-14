@@ -11,11 +11,11 @@ export function AppLayout() {
         <AnimatePresence mode="wait" initial={false}>
           <motion.div
             key={pathname}
-            initial={{ opacity: 0, x: 6 }}
-            animate={{ opacity: 1, x: 0 }}
-            exit={{ opacity: 0, x: -6 }}
-            transition={{ duration: 0.16, ease: 'easeOut' }}
-            className="px-8 py-8 min-h-full"
+            initial={{ opacity: 0, y: 4 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.14, ease: 'easeOut' }}
+            className="px-10 py-9 min-h-full"
           >
             <Outlet />
           </motion.div>

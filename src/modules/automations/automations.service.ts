@@ -2,12 +2,11 @@ import { supabase } from '../../lib/supabase'
 import type { Automation, AutomationLog } from '../../types/crm.types'
 
 export async function getAutomations(businessId: string): Promise<Automation[]> {
-  const { data, error } = await supabase
+  const { data } = await supabase
     .from('automations')
     .select('*')
     .eq('business_id', businessId)
     .order('created_at', { ascending: false })
-  if (error) throw error
   return (data ?? []) as Automation[]
 }
 
@@ -20,43 +19,41 @@ export async function createAutomation(input: {
   delay_minutes?: number
   action_config?: Record<string, unknown>
   is_active?: boolean
-}): Promise<Automation> {
+}): Promise<Automation | null> {
   const { data, error } = await supabase
     .from('automations')
     .insert(input)
     .select()
     .single()
-  if (error) throw error
+  if (error) { console.error('createAutomation:', error); return null }
   return data as Automation
 }
 
-export async function updateAutomation(id: string, input: Partial<Omit<Automation, 'id' | 'created_at'>>): Promise<Automation> {
+export async function updateAutomation(id: string, input: Partial<Omit<Automation, 'id' | 'created_at'>>): Promise<Automation | null> {
   const { data, error } = await supabase
     .from('automations')
     .update(input)
     .eq('id', id)
     .select()
     .single()
-  if (error) throw error
+  if (error) { console.error('updateAutomation:', error); return null }
   return data as Automation
 }
 
 export async function deleteAutomation(id: string): Promise<void> {
-  const { error } = await supabase.from('automations').delete().eq('id', id)
-  if (error) throw error
+  await supabase.from('automations').delete().eq('id', id)
 }
 
-export async function toggleAutomation(id: string, isActive: boolean): Promise<Automation> {
+export async function toggleAutomation(id: string, isActive: boolean): Promise<Automation | null> {
   return updateAutomation(id, { is_active: isActive })
 }
 
 export async function getAutomationLogs(businessId: string): Promise<AutomationLog[]> {
-  const { data, error } = await supabase
+  const { data } = await supabase
     .from('automation_logs')
     .select('*')
     .eq('business_id', businessId)
     .order('created_at', { ascending: false })
     .limit(100)
-  if (error) throw error
   return (data ?? []) as AutomationLog[]
 }

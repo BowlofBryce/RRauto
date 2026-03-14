@@ -10,17 +10,17 @@ interface Props {
 }
 
 const styles: Record<Variant, string> = {
-  default: 'bg-brand-subtle text-brand-muted',
-  success: 'bg-green-subtle text-green-muted',
-  warning: 'bg-amber-subtle text-amber-muted',
-  danger:  'bg-red-subtle text-red-muted',
-  neutral: 'bg-subtle text-3',
+  default:  'bg-brand-subtle text-brand-muted',
+  success:  'bg-green-subtle text-green-muted',
+  warning:  'bg-amber-subtle text-amber-muted',
+  danger:   'bg-red-subtle text-red-muted',
+  neutral:  'bg-subtle text-3',
 }
 
 export function Badge({ children, variant = 'neutral', className }: Props) {
   return (
     <span className={cn(
-      'inline-flex items-center gap-1 px-2 py-0.5 text-[11px] font-medium rounded-full',
+      'inline-flex items-center gap-1 px-1.5 py-0.5 text-[11px] font-medium rounded-md',
       styles[variant], className
     )}>
       {children}

@@ -11,24 +11,27 @@ interface Props extends ButtonHTMLAttributes<HTMLButtonElement> {
 }
 
 export function Button({ children, variant = 'secondary', size = 'md', loading, className, disabled, ...rest }: Props) {
-  const base = 'inline-flex items-center justify-center font-medium rounded-lg transition-all duration-150 select-none cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-1 disabled:opacity-40 disabled:pointer-events-none'
+  const base = 'inline-flex items-center justify-center font-medium rounded-lg transition-all duration-150 select-none cursor-pointer focus-visible:outline-none disabled:opacity-40 disabled:pointer-events-none gap-1.5'
 
   const variants: Record<Variant, string> = {
-    primary:   'bg-brand text-white hover:brightness-110 focus-visible:ring-brand shadow-sm',
-    secondary: 'bg-raised border border-app text-1 hover:bg-subtle focus-visible:ring-brand shadow-app-sm',
-    ghost:     'text-3 hover:text-2 hover:bg-subtle focus-visible:ring-brand',
-    danger:    'bg-red-subtle text-red-muted hover:bg-red-100 focus-visible:ring-red border border-red-subtle',
+    primary:   'text-white shadow-app-xs hover:opacity-90 active:scale-[0.98]',
+    secondary: 'bg-raised border border-app text-1 hover:bg-subtle shadow-app-xs active:scale-[0.98]',
+    ghost:     'text-3 hover:text-2 hover:bg-subtle active:scale-[0.98]',
+    danger:    'bg-red-subtle text-red-muted hover:opacity-90 active:scale-[0.98]',
   }
 
   const sizes: Record<Size, string> = {
-    xs: 'h-6 px-2 text-xs gap-1',
-    sm: 'h-7 px-2.5 text-xs gap-1.5',
-    md: 'h-8 px-3.5 text-[13px] gap-2',
+    xs: 'h-6 px-2 text-[11px]',
+    sm: 'h-7 px-2.5 text-xs',
+    md: 'h-8 px-3.5 text-[13px]',
   }
+
+  const primaryStyle = variant === 'primary' ? { backgroundColor: 'var(--brand)' } : {}
 
   return (
     <button
       className={cn(base, variants[variant], sizes[size], className)}
+      style={primaryStyle}
       disabled={disabled || loading}
       {...rest}
     >

@@ -4,12 +4,11 @@ import type { Quote, QuoteWithContact } from '../../types/crm.types'
 export type { QuoteWithContact }
 
 export async function getQuotes(businessId: string): Promise<QuoteWithContact[]> {
-  const { data, error } = await supabase
+  const { data } = await supabase
     .from('quotes')
     .select('*, contacts(id,name,phone,email)')
     .eq('business_id', businessId)
     .order('created_at', { ascending: false })
-  if (error) throw error
   return (data ?? []) as unknown as QuoteWithContact[]
 }
 
@@ -18,28 +17,27 @@ export async function createQuote(input: {
   contact_id: string
   amount: number
   notes?: string | null
-}): Promise<Quote> {
+}): Promise<Quote | null> {
   const { data, error } = await supabase
     .from('quotes')
     .insert(input)
     .select()
     .single()
-  if (error) throw error
+  if (error) { console.error('createQuote:', error); return null }
   return data as Quote
 }
 
-export async function updateQuote(id: string, input: Partial<Omit<Quote, 'id' | 'created_at'>>): Promise<Quote> {
+export async function updateQuote(id: string, input: Partial<Omit<Quote, 'id' | 'created_at'>>): Promise<Quote | null> {
   const { data, error } = await supabase
     .from('quotes')
     .update(input)
     .eq('id', id)
     .select()
     .single()
-  if (error) throw error
+  if (error) { console.error('updateQuote:', error); return null }
   return data as Quote
 }
 
 export async function deleteQuote(id: string): Promise<void> {
-  const { error } = await supabase.from('quotes').delete().eq('id', id)
-  if (error) throw error
+  await supabase.from('quotes').delete().eq('id', id)
 }

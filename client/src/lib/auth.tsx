@@ -59,10 +59,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     setUserEmail(data.user.email ?? null)
     sessionStorage.setItem('sb_user_email', data.user.email ?? '')
 
-    const client = supabase
-    const { data: rows, error: bizErr } = await client
+    const { data: rows, error: bizErr } = await supabase
       .from('business_users')
       .select('business_id')
+      .eq('user_id', data.user.id)
       .limit(1)
 
     if (bizErr || !rows?.length) throw new Error('No business found for this user')

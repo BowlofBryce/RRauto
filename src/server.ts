@@ -33,6 +33,12 @@ app.get("/login", (_req, res) => {
   res.send(html);
 });
 
+app.get("/dashboard", (_req, res) => {
+  const html = readFileSync(join(__dirname, "public/dashboard.html"), "utf8");
+  res.setHeader("Content-Type", "text/html");
+  res.send(html);
+});
+
 app.use(withAuthOrBusinessScope);
 
 app.use("/contacts", contactsRouter);

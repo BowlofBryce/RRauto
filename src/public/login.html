@@ -284,9 +284,8 @@
         sessionStorage.setItem('crm_token', token);
         sessionStorage.setItem('crm_business_id', businessId);
 
-        successEl.textContent = 'Signed in! Business ID: ' + businessId;
-        successEl.style.display = 'block';
-        btn.textContent = 'Signed in';
+        btn.textContent = 'Redirecting...';
+        window.location.href = '/dashboard';
       } catch (err) {
         errorEl.textContent = err.message;
         errorEl.style.display = 'block';

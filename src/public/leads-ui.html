@@ -1,0 +1,312 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Leads — CRM</title>
+  <link rel="stylesheet" href="/crm.css" />
+</head>
+<body>
+<script src="/crm.js"></script>
+<div class="layout">
+  <div id="sidebar-mount"></div>
+  <div class="main">
+    <div class="topbar">
+      <span class="topbar-title">Leads</span>
+      <span id="count-badge" class="badge badge-gray" style="font-size:11px">0</span>
+      <div class="topbar-spacer"></div>
+      <div class="filter-bar" style="margin-bottom:0">
+        <span class="filter-chip active" data-filter="all" onclick="setFilter('all',this)">All</span>
+        <span class="filter-chip" data-filter="new" onclick="setFilter('new',this)">New</span>
+        <span class="filter-chip" data-filter="contacted" onclick="setFilter('contacted',this)">Contacted</span>
+        <span class="filter-chip" data-filter="quoted" onclick="setFilter('quoted',this)">Quoted</span>
+        <span class="filter-chip" data-filter="won" onclick="setFilter('won',this)">Won</span>
+      </div>
+      <button class="btn btn-primary" onclick="CRM.openModal('new-modal')">
+        <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4"/></svg>
+        New Lead
+      </button>
+    </div>
+    <div class="content">
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Contact ID</th>
+              <th>Source</th>
+              <th>Status</th>
+              <th>Pipeline Stage</th>
+              <th>Assigned To</th>
+              <th>Created</th>
+            </tr>
+          </thead>
+          <tbody id="tbody"></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Detail Panel -->
+<div id="panel-backdrop" onclick="closePanel()" style="display:none;position:fixed;inset:0;z-index:40"></div>
+<div class="detail-panel" id="detail-panel">
+  <div class="detail-header">
+    <div class="detail-title" id="dp-title">Lead</div>
+    <button class="btn btn-secondary btn-sm" onclick="openEdit()">Edit</button>
+    <button class="modal-close" onclick="closePanel()"><svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/></svg></button>
+  </div>
+  <div class="detail-body">
+    <div class="detail-field"><div class="detail-field-label">Contact ID</div><div class="detail-field-value" id="dp-contact" style="font-family:monospace;font-size:12px">—</div></div>
+    <div class="detail-field"><div class="detail-field-label">Source</div><div class="detail-field-value" id="dp-source">—</div></div>
+    <div class="detail-field"><div class="detail-field-label">Status</div><div class="detail-field-value" id="dp-status">—</div></div>
+    <div class="detail-field"><div class="detail-field-label">Pipeline Stage</div><div class="detail-field-value" id="dp-stage">—</div></div>
+    <div class="detail-field"><div class="detail-field-label">Assigned To</div><div class="detail-field-value" id="dp-assigned">—</div></div>
+    <div class="detail-field"><div class="detail-field-label">Created</div><div class="detail-field-value" id="dp-created">—</div></div>
+    <hr class="divider" />
+    <div style="display:flex;gap:8px">
+      <button class="btn btn-secondary btn-sm" style="flex:1" onclick="moveLead('won')">Mark Won</button>
+      <button class="btn btn-secondary btn-sm" style="flex:1" onclick="moveLead('lost')">Mark Lost</button>
+    </div>
+    <div style="margin-top:8px">
+      <button class="btn btn-danger btn-sm" style="width:100%" onclick="deleteLead()">Delete Lead</button>
+    </div>
+  </div>
+</div>
+
+<!-- New Lead Modal -->
+<div class="modal-overlay" id="new-modal">
+  <div class="modal">
+    <div class="modal-header">
+      <div class="modal-title">New Lead</div>
+      <button class="modal-close" onclick="CRM.closeModal('new-modal')"><svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/></svg></button>
+    </div>
+    <form id="new-form">
+      <div class="modal-body">
+        <div class="form-group"><label class="form-label">Contact ID *</label><input class="form-input" id="n-contact" required placeholder="Paste contact UUID" /></div>
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label">Source</label>
+            <select class="form-input" id="n-source">
+              <option value="">— Select —</option>
+              <option>Website</option><option>Referral</option><option>Google Ads</option>
+              <option>Facebook</option><option>Cold Outreach</option><option>Walk-in</option><option>Phone Call</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Status</label>
+            <select class="form-input" id="n-status">
+              <option value="new">New</option>
+              <option value="contacted">Contacted</option>
+              <option value="quoted">Quoted</option>
+              <option value="won">Won</option>
+              <option value="lost">Lost</option>
+            </select>
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label">Pipeline Stage</label>
+            <select class="form-input" id="n-stage">
+              <option value="New Lead">New Lead</option>
+              <option value="Contacted">Contacted</option>
+              <option value="Quoted">Quoted</option>
+              <option value="Scheduled">Scheduled</option>
+              <option value="Completed">Completed</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Assigned To</label>
+            <input class="form-input" id="n-assigned" placeholder="Team member name" />
+          </div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" onclick="CRM.closeModal('new-modal')">Cancel</button>
+        <button type="submit" class="btn btn-primary">Create Lead</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- Edit Lead Modal -->
+<div class="modal-overlay" id="edit-modal">
+  <div class="modal">
+    <div class="modal-header">
+      <div class="modal-title">Edit Lead</div>
+      <button class="modal-close" onclick="CRM.closeModal('edit-modal')"><svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/></svg></button>
+    </div>
+    <form id="edit-form">
+      <div class="modal-body">
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label">Status</label>
+            <select class="form-input" id="e-status">
+              <option value="new">New</option>
+              <option value="contacted">Contacted</option>
+              <option value="quoted">Quoted</option>
+              <option value="won">Won</option>
+              <option value="lost">Lost</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Source</label>
+            <select class="form-input" id="e-source">
+              <option value="">— Select —</option>
+              <option>Website</option><option>Referral</option><option>Google Ads</option>
+              <option>Facebook</option><option>Cold Outreach</option><option>Walk-in</option><option>Phone Call</option>
+            </select>
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label">Pipeline Stage</label>
+            <select class="form-input" id="e-stage">
+              <option value="New Lead">New Lead</option>
+              <option value="Contacted">Contacted</option>
+              <option value="Quoted">Quoted</option>
+              <option value="Scheduled">Scheduled</option>
+              <option value="Completed">Completed</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Assigned To</label>
+            <input class="form-input" id="e-assigned" />
+          </div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" onclick="CRM.closeModal('edit-modal')">Cancel</button>
+        <button type="submit" class="btn btn-primary">Save Changes</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<script>
+  document.getElementById('sidebar-mount').outerHTML = CRM.buildSidebar('leads');
+
+  let leads = [], selected = null, activeFilter = 'all';
+
+  function statusBadge(s) { return CRM.statusBadge(s); }
+
+  function render(data) {
+    const tbody = document.getElementById('tbody');
+    if (!data.length) {
+      tbody.innerHTML = '<tr><td colspan="6"><div class="empty-state"><svg class="empty-icon" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"/></svg><div class="empty-title">No leads found</div><div class="empty-sub">Create a lead to start tracking prospects</div></div></td></tr>';
+      return;
+    }
+    tbody.innerHTML = data.map(l => '<tr onclick="openDetail(\'' + l.id + '\')">' +
+      '<td style="font-family:monospace;font-size:11px;color:var(--text-tertiary)">' + (l.contact_id||'').slice(0,8) + '…</td>' +
+      '<td class="cell-muted">' + (l.source || '—') + '</td>' +
+      '<td>' + statusBadge(l.status) + '</td>' +
+      '<td class="cell-muted">' + (l.pipeline_stage || '—') + '</td>' +
+      '<td class="cell-muted">' + (l.assigned_to || '—') + '</td>' +
+      '<td class="cell-muted cell-sm">' + CRM.formatDate(l.created_at) + '</td>' +
+      '</tr>').join('');
+  }
+
+  function setFilter(f, el) {
+    activeFilter = f;
+    document.querySelectorAll('.filter-chip').forEach(c => c.classList.remove('active'));
+    el.classList.add('active');
+    const filtered = f === 'all' ? leads : leads.filter(l => l.status === f);
+    document.getElementById('count-badge').textContent = filtered.length;
+    render(filtered);
+  }
+
+  function openDetail(id) {
+    selected = leads.find(l => l.id === id);
+    if (!selected) return;
+    document.getElementById('dp-title').textContent = 'Lead — ' + (selected.source || 'Unknown source');
+    document.getElementById('dp-contact').textContent = selected.contact_id || '—';
+    document.getElementById('dp-source').textContent = selected.source || '—';
+    document.getElementById('dp-status').innerHTML = statusBadge(selected.status);
+    document.getElementById('dp-stage').textContent = selected.pipeline_stage || '—';
+    document.getElementById('dp-assigned').textContent = selected.assigned_to || '—';
+    document.getElementById('dp-created').textContent = CRM.formatDate(selected.created_at);
+    document.getElementById('detail-panel').classList.add('open');
+    document.getElementById('panel-backdrop').style.display = 'block';
+  }
+
+  function closePanel() {
+    document.getElementById('detail-panel').classList.remove('open');
+    document.getElementById('panel-backdrop').style.display = 'none';
+  }
+
+  function openEdit() {
+    if (!selected) return;
+    document.getElementById('e-status').value = selected.status || 'new';
+    document.getElementById('e-source').value = selected.source || '';
+    document.getElementById('e-stage').value = selected.pipeline_stage || 'New Lead';
+    document.getElementById('e-assigned').value = selected.assigned_to || '';
+    CRM.openModal('edit-modal');
+  }
+
+  async function moveLead(status) {
+    if (!selected) return;
+    try {
+      await CRM.api('/leads/' + selected.id, { method: 'PATCH', body: JSON.stringify({ status }) });
+      closePanel();
+      CRM.toast('Lead updated', 'success');
+      await load();
+    } catch(err) { CRM.toast(err.message, 'error'); }
+  }
+
+  async function deleteLead() {
+    if (!selected || !confirm('Delete this lead? This cannot be undone.')) return;
+    try {
+      await CRM.api('/leads/' + selected.id, { method: 'DELETE' });
+      closePanel();
+      CRM.toast('Lead deleted', 'success');
+      await load();
+    } catch(err) { CRM.toast(err.message, 'error'); }
+  }
+
+  document.getElementById('new-form').addEventListener('submit', async function(e) {
+    e.preventDefault();
+    const body = {
+      contact_id: document.getElementById('n-contact').value,
+      source: document.getElementById('n-source').value || null,
+      status: document.getElementById('n-status').value,
+      pipeline_stage: document.getElementById('n-stage').value,
+      assigned_to: document.getElementById('n-assigned').value || null,
+    };
+    try {
+      await CRM.api('/leads', { method: 'POST', body: JSON.stringify(body) });
+      CRM.closeModal('new-modal');
+      CRM.toast('Lead created', 'success');
+      await load();
+    } catch(err) { CRM.toast(err.message, 'error'); }
+  });
+
+  document.getElementById('edit-form').addEventListener('submit', async function(e) {
+    e.preventDefault();
+    if (!selected) return;
+    const body = {
+      status: document.getElementById('e-status').value,
+      source: document.getElementById('e-source').value || null,
+      pipeline_stage: document.getElementById('e-stage').value,
+      assigned_to: document.getElementById('e-assigned').value || null,
+    };
+    try {
+      await CRM.api('/leads/' + selected.id, { method: 'PATCH', body: JSON.stringify(body) });
+      CRM.closeModal('edit-modal');
+      closePanel();
+      CRM.toast('Lead updated', 'success');
+      await load();
+    } catch(err) { CRM.toast(err.message, 'error'); }
+  });
+
+  async function load() {
+    try {
+      leads = await CRM.api('/leads');
+      const filtered = activeFilter === 'all' ? leads : leads.filter(l => l.status === activeFilter);
+      document.getElementById('count-badge').textContent = filtered.length;
+      render(filtered);
+    } catch(err) { CRM.toast(err.message, 'error'); }
+  }
+
+  load();
+</script>
+</body>
+</html>

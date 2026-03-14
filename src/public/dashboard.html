@@ -3,319 +3,336 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>CRM Dashboard</title>
+  <title>Dashboard — CRM</title>
+  <link rel="stylesheet" href="/crm.css" />
   <style>
-    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    .dashboard-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 16px;
+      margin-bottom: 24px;
+    }
+    @media (max-width: 900px) { .dashboard-grid { grid-template-columns: repeat(2,1fr); } }
 
-    body {
-      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-      background: #f1f5f9;
-      color: #1e293b;
-      min-height: 100vh;
+    .metric-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 18px 20px;
+      transition: box-shadow 0.15s;
+      cursor: pointer;
+      text-decoration: none;
+      display: block;
+      color: inherit;
     }
 
-    header {
-      background: #fff;
-      border-bottom: 1px solid #e2e8f0;
-      padding: 0 32px;
-      height: 56px;
+    .metric-card:hover { box-shadow: var(--shadow-sm); border-color: #d1d5db; }
+
+    .metric-top {
       display: flex;
       align-items: center;
       justify-content: space-between;
-      position: sticky;
-      top: 0;
-      z-index: 10;
-    }
-
-    .logo {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-    }
-
-    .logo-icon {
-      width: 32px;
-      height: 32px;
-      background: #0ea5e9;
-      border-radius: 7px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-    }
-
-    .logo-icon svg { width: 18px; height: 18px; }
-
-    .logo-text {
-      font-size: 16px;
-      font-weight: 700;
-      color: #0f172a;
-    }
-
-    .header-right {
-      display: flex;
-      align-items: center;
-      gap: 16px;
-    }
-
-    .business-badge {
-      font-size: 12px;
-      color: #64748b;
-      background: #f1f5f9;
-      border: 1px solid #e2e8f0;
-      border-radius: 6px;
-      padding: 4px 10px;
-    }
-
-    .signout-btn {
-      font-size: 13px;
-      color: #64748b;
-      background: none;
-      border: none;
-      cursor: pointer;
-      padding: 6px 10px;
-      border-radius: 6px;
-      transition: background 0.15s, color 0.15s;
-    }
-
-    .signout-btn:hover { background: #f1f5f9; color: #1e293b; }
-
-    main {
-      max-width: 1100px;
-      margin: 0 auto;
-      padding: 32px 24px;
-    }
-
-    .page-title {
-      font-size: 22px;
-      font-weight: 700;
-      color: #0f172a;
-      margin-bottom: 24px;
-      letter-spacing: -0.3px;
-    }
-
-    .grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
-      gap: 16px;
-      margin-bottom: 40px;
-    }
-
-    .stat-card {
-      background: #fff;
-      border-radius: 10px;
-      border: 1px solid #e2e8f0;
-      padding: 20px 24px;
-      display: flex;
-      flex-direction: column;
-      gap: 6px;
-      transition: box-shadow 0.15s;
-    }
-
-    .stat-card:hover { box-shadow: 0 4px 12px rgba(0,0,0,0.06); }
-
-    .stat-label {
-      font-size: 12px;
-      font-weight: 600;
-      color: #94a3b8;
-      text-transform: uppercase;
-      letter-spacing: 0.5px;
-    }
-
-    .stat-value {
-      font-size: 28px;
-      font-weight: 700;
-      color: #0f172a;
-      letter-spacing: -0.5px;
-    }
-
-    .stat-icon {
-      width: 32px;
-      height: 32px;
-      border-radius: 8px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      margin-bottom: 8px;
-    }
-
-    .stat-icon svg { width: 16px; height: 16px; }
-
-    .icon-blue { background: #eff6ff; color: #3b82f6; }
-    .icon-green { background: #f0fdf4; color: #22c55e; }
-    .icon-amber { background: #fffbeb; color: #f59e0b; }
-    .icon-sky { background: #f0f9ff; color: #0ea5e9; }
-    .icon-rose { background: #fff1f2; color: #f43f5e; }
-    .icon-teal { background: #f0fdfa; color: #14b8a6; }
-
-    .section-title {
-      font-size: 15px;
-      font-weight: 600;
-      color: #0f172a;
       margin-bottom: 12px;
     }
 
-    .nav-links {
-      display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
-      gap: 10px;
-    }
-
-    .nav-link {
-      background: #fff;
-      border: 1px solid #e2e8f0;
-      border-radius: 8px;
-      padding: 14px 16px;
+    .metric-icon {
+      width: 34px;
+      height: 34px;
+      border-radius: var(--radius-sm);
       display: flex;
       align-items: center;
-      gap: 10px;
-      font-size: 13px;
-      font-weight: 600;
-      color: #374151;
-      text-decoration: none;
-      transition: border-color 0.15s, box-shadow 0.15s;
-      cursor: pointer;
+      justify-content: center;
     }
 
-    .nav-link:hover { border-color: #0ea5e9; box-shadow: 0 2px 8px rgba(14,165,233,0.1); color: #0ea5e9; }
+    .metric-icon svg { width: 16px; height: 16px; }
 
-    .nav-link-icon {
-      width: 28px;
-      height: 28px;
-      border-radius: 6px;
+    .metric-label { font-size: 12px; font-weight: 600; color: var(--text-tertiary); text-transform: uppercase; letter-spacing: 0.5px; }
+
+    .metric-value { font-size: 28px; font-weight: 700; color: var(--text-primary); letter-spacing: -0.8px; line-height: 1; margin-bottom: 4px; }
+
+    .metric-sub { font-size: 12px; color: var(--text-tertiary); }
+
+    .section-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 12px;
+    }
+
+    .section-title { font-size: 14px; font-weight: 600; color: var(--text-primary); }
+
+    .section-link {
+      font-size: 12px;
+      color: var(--accent);
+      text-decoration: none;
+      font-weight: 500;
+    }
+
+    .section-link:hover { text-decoration: underline; }
+
+    .two-col {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px;
+    }
+
+    @media (max-width: 800px) { .two-col { grid-template-columns: 1fr; } }
+
+    .activity-item {
+      display: flex;
+      align-items: flex-start;
+      gap: 10px;
+      padding: 10px 14px;
+      border-bottom: 1px solid var(--border-subtle);
+      font-size: 13px;
+    }
+
+    .activity-item:last-child { border-bottom: none; }
+
+    .activity-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      margin-top: 5px;
+      flex-shrink: 0;
+    }
+
+    .dot-blue { background: var(--accent); }
+    .dot-green { background: #22c55e; }
+    .dot-yellow { background: #f59e0b; }
+    .dot-teal { background: #14b8a6; }
+
+    .activity-text { flex: 1; color: var(--text-secondary); line-height: 1.5; }
+    .activity-time { font-size: 11px; color: var(--text-tertiary); white-space: nowrap; }
+
+    .quick-action {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 11px 14px;
+      border-bottom: 1px solid var(--border-subtle);
+      cursor: pointer;
+      transition: background 0.12s;
+      text-decoration: none;
+      color: inherit;
+    }
+
+    .quick-action:last-child { border-bottom: none; }
+    .quick-action:hover { background: var(--bg); }
+
+    .quick-action-icon {
+      width: 32px;
+      height: 32px;
+      border-radius: var(--radius-sm);
       display: flex;
       align-items: center;
       justify-content: center;
       flex-shrink: 0;
     }
 
-    .nav-link-icon svg { width: 14px; height: 14px; }
+    .quick-action-icon svg { width: 14px; height: 14px; }
 
-    .loading { color: #94a3b8; font-size: 14px; }
+    .quick-action-text { flex: 1; }
+    .quick-action-label { font-size: 13px; font-weight: 500; color: var(--text-primary); }
+    .quick-action-sub { font-size: 12px; color: var(--text-tertiary); }
+
+    .panel {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      overflow: hidden;
+    }
   </style>
 </head>
 <body>
-  <header>
-    <div class="logo">
-      <div class="logo-icon">
-        <svg fill="none" viewBox="0 0 24 24" stroke="white" stroke-width="2">
-          <path stroke-linecap="round" stroke-linejoin="round" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z"/>
-        </svg>
+<script src="/crm.js"></script>
+<div class="layout">
+  <div id="sidebar-mount"></div>
+  <div class="main">
+    <div class="topbar">
+      <span class="topbar-title">Dashboard</span>
+      <div class="topbar-spacer"></div>
+      <span id="biz-badge" style="font-size:12px;color:var(--text-tertiary);background:var(--bg);border:1px solid var(--border);border-radius:4px;padding:3px 10px">Loading…</span>
+    </div>
+    <div class="content">
+
+      <!-- Metric Cards -->
+      <div class="dashboard-grid" id="metrics-grid">
+        <div class="metric-card"><div class="metric-top"><span class="metric-label">Contacts</span></div><div class="metric-value">…</div></div>
+        <div class="metric-card"><div class="metric-top"><span class="metric-label">Leads</span></div><div class="metric-value">…</div></div>
+        <div class="metric-card"><div class="metric-top"><span class="metric-label">Jobs</span></div><div class="metric-value">…</div></div>
+        <div class="metric-card"><div class="metric-top"><span class="metric-label">Quotes</span></div><div class="metric-value">…</div></div>
+        <div class="metric-card"><div class="metric-top"><span class="metric-label">Revenue</span></div><div class="metric-value">…</div></div>
+        <div class="metric-card"><div class="metric-top"><span class="metric-label">Automations</span></div><div class="metric-value">…</div></div>
       </div>
-      <span class="logo-text">CRM</span>
-    </div>
-    <div class="header-right">
-      <span class="business-badge" id="bizBadge">Loading...</span>
-      <button class="signout-btn" onclick="signOut()">Sign out</button>
-    </div>
-  </header>
 
-  <main>
-    <div class="page-title">Dashboard</div>
-
-    <div class="grid" id="statsGrid">
-      <div class="stat-card"><span class="loading">Loading stats...</span></div>
-    </div>
-
-    <div class="section-title">Modules</div>
-    <div class="nav-links">
-      <a class="nav-link" onclick="navigate('/contacts')">
-        <div class="nav-link-icon icon-blue">
-          <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
-        </div>
-        Contacts
-      </a>
-      <a class="nav-link" onclick="navigate('/leads')">
-        <div class="nav-link-icon icon-green">
-          <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"/></svg>
-        </div>
-        Leads
-      </a>
-      <a class="nav-link" onclick="navigate('/jobs')">
-        <div class="nav-link-icon icon-amber">
-          <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M21 13.255A23.931 23.931 0 0112 15c-3.183 0-6.22-.62-9-1.745M16 6V4a2 2 0 00-2-2h-4a2 2 0 00-2 2v2m4 6h.01M5 20h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/></svg>
-        </div>
-        Jobs
-      </a>
-      <a class="nav-link" onclick="navigate('/quotes')">
-        <div class="nav-link-icon icon-sky">
-          <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
-        </div>
-        Quotes
-      </a>
-      <a class="nav-link" onclick="navigate('/pipeline')">
-        <div class="nav-link-icon icon-teal">
-          <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/></svg>
-        </div>
-        Pipeline
-      </a>
-      <a class="nav-link" onclick="navigate('/communications')">
-        <div class="nav-link-icon icon-rose">
-          <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"/></svg>
-        </div>
-        Communications
-      </a>
-    </div>
-  </main>
-
-  <script>
-    const token = sessionStorage.getItem('crm_token');
-    const businessId = sessionStorage.getItem('crm_business_id');
-
-    if (!token || !businessId) {
-      window.location.href = '/login';
-    }
-
-    document.getElementById('bizBadge').textContent = 'Business: ' + businessId.slice(0, 8) + '...';
-
-    function apiHeaders() {
-      return {
-        'Authorization': 'Bearer ' + token,
-        'x-business-id': businessId,
-        'Content-Type': 'application/json',
-      };
-    }
-
-    function navigate(path) {
-      window.location.href = path + '?token=' + encodeURIComponent(token) + '&business_id=' + encodeURIComponent(businessId);
-    }
-
-    function signOut() {
-      sessionStorage.removeItem('crm_token');
-      sessionStorage.removeItem('crm_business_id');
-      window.location.href = '/login';
-    }
-
-    async function loadStats() {
-      const modules = [
-        { label: 'Contacts', path: '/contacts', iconClass: 'icon-blue', icon: '<path stroke-linecap="round" stroke-linejoin="round" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z"/>' },
-        { label: 'Leads', path: '/leads', iconClass: 'icon-green', icon: '<path stroke-linecap="round" stroke-linejoin="round" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"/>' },
-        { label: 'Jobs', path: '/jobs', iconClass: 'icon-amber', icon: '<path stroke-linecap="round" stroke-linejoin="round" d="M21 13.255A23.931 23.931 0 0112 15c-3.183 0-6.22-.62-9-1.745M16 6V4a2 2 0 00-2-2h-4a2 2 0 00-2 2v2m4 6h.01M5 20h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/>' },
-        { label: 'Quotes', path: '/quotes', iconClass: 'icon-sky', icon: '<path stroke-linecap="round" stroke-linejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>' },
-        { label: 'Pipeline', path: '/pipeline', iconClass: 'icon-teal', icon: '<path stroke-linecap="round" stroke-linejoin="round" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/>' },
-        { label: 'Communications', path: '/communications', iconClass: 'icon-rose', icon: '<path stroke-linecap="round" stroke-linejoin="round" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"/>' },
-      ];
-
-      const results = await Promise.all(
-        modules.map(m =>
-          fetch(m.path, { headers: apiHeaders() })
-            .then(r => r.ok ? r.json() : [])
-            .catch(() => [])
-        )
-      );
-
-      const grid = document.getElementById('statsGrid');
-      grid.innerHTML = modules.map((m, i) => `
-        <div class="stat-card">
-          <div class="stat-icon ${m.iconClass}">
-            <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">${m.icon}</svg>
+      <!-- Two Column Layout -->
+      <div class="two-col">
+        <!-- Quick Actions -->
+        <div>
+          <div class="section-header">
+            <span class="section-title">Quick Actions</span>
           </div>
-          <div class="stat-label">${m.label}</div>
-          <div class="stat-value">${Array.isArray(results[i]) ? results[i].length : '—'}</div>
+          <div class="panel">
+            <a class="quick-action" href="/contacts-ui">
+              <div class="quick-action-icon" style="background:#eff6ff;color:#2563eb">
+                <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z"/></svg>
+              </div>
+              <div class="quick-action-text">
+                <div class="quick-action-label">Add Contact</div>
+                <div class="quick-action-sub">Create a new customer record</div>
+              </div>
+              <svg style="width:14px;height:14px;color:var(--text-tertiary)" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/></svg>
+            </a>
+            <a class="quick-action" href="/leads-ui">
+              <div class="quick-action-icon" style="background:#f0fdf4;color:#16a34a">
+                <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"/></svg>
+              </div>
+              <div class="quick-action-text">
+                <div class="quick-action-label">New Lead</div>
+                <div class="quick-action-sub">Track a new prospect</div>
+              </div>
+              <svg style="width:14px;height:14px;color:var(--text-tertiary)" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/></svg>
+            </a>
+            <a class="quick-action" href="/jobs-ui">
+              <div class="quick-action-icon" style="background:#fffbeb;color:#d97706">
+                <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M21 13.255A23.931 23.931 0 0112 15c-3.183 0-6.22-.62-9-1.745M16 6V4a2 2 0 00-2-2h-4a2 2 0 00-2 2v2m4 6h.01M5 20h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/></svg>
+              </div>
+              <div class="quick-action-text">
+                <div class="quick-action-label">Schedule Job</div>
+                <div class="quick-action-sub">Book a service appointment</div>
+              </div>
+              <svg style="width:14px;height:14px;color:var(--text-tertiary)" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/></svg>
+            </a>
+            <a class="quick-action" href="/quotes-ui">
+              <div class="quick-action-icon" style="background:#f0f9ff;color:#0ea5e9">
+                <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
+              </div>
+              <div class="quick-action-text">
+                <div class="quick-action-label">Send Quote</div>
+                <div class="quick-action-sub">Create and send a proposal</div>
+              </div>
+              <svg style="width:14px;height:14px;color:var(--text-tertiary)" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/></svg>
+            </a>
+            <a class="quick-action" href="/automations-ui">
+              <div class="quick-action-icon" style="background:#fdf2f8;color:#9333ea">
+                <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
+              </div>
+              <div class="quick-action-text">
+                <div class="quick-action-label">Manage Automations</div>
+                <div class="quick-action-sub">Set up automated workflows</div>
+              </div>
+              <svg style="width:14px;height:14px;color:var(--text-tertiary)" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/></svg>
+            </a>
+          </div>
         </div>
-      `).join('');
-    }
 
-    loadStats();
-  </script>
+        <!-- Pipeline Overview -->
+        <div>
+          <div class="section-header">
+            <span class="section-title">Pipeline Overview</span>
+            <a href="/pipeline-ui" class="section-link">View board →</a>
+          </div>
+          <div class="panel" id="pipeline-panel">
+            <div style="padding:20px;color:var(--text-tertiary);font-size:13px">Loading…</div>
+          </div>
+          <div style="margin-top:16px">
+            <div class="section-header">
+              <span class="section-title">Recent Jobs</span>
+              <a href="/jobs-ui" class="section-link">View all →</a>
+            </div>
+            <div class="panel" id="jobs-panel">
+              <div style="padding:20px;color:var(--text-tertiary);font-size:13px">Loading…</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<script>
+  document.getElementById('sidebar-mount').outerHTML = CRM.buildSidebar('dashboard');
+  document.getElementById('biz-badge').textContent = 'ID: ' + CRM.businessId.slice(0,8) + '…';
+
+  async function load() {
+    try {
+      const [contacts, leads, jobs, quotes, automations, pipeline] = await Promise.all([
+        CRM.api('/contacts'),
+        CRM.api('/leads'),
+        CRM.api('/jobs'),
+        CRM.api('/quotes'),
+        CRM.api('/automations'),
+        CRM.api('/pipeline'),
+      ]);
+
+      const completedJobs = jobs.filter(j => j.status === 'completed');
+      const revenue = completedJobs.reduce((s, j) => s + parseFloat(j.price || 0), 0);
+      const activeAutomations = automations.filter(a => a.is_active).length;
+      const openLeads = leads.filter(l => l.status !== 'won' && l.status !== 'lost').length;
+      const scheduledJobs = jobs.filter(j => j.status === 'scheduled').length;
+      const acceptedQuotes = quotes.filter(q => q.status === 'accepted').length;
+
+      document.getElementById('metrics-grid').innerHTML = [
+        { label: 'Contacts', value: contacts.length, sub: 'Total records', href: '/contacts-ui', bg: '#eff6ff', color: '#2563eb', icon: 'M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z' },
+        { label: 'Open Leads', value: openLeads, sub: leads.length + ' total', href: '/leads-ui', bg: '#f0fdf4', color: '#16a34a', icon: 'M13 7h8m0 0v8m0-8l-8 8-4-4-6 6' },
+        { label: 'Scheduled Jobs', value: scheduledJobs, sub: jobs.length + ' total', href: '/jobs-ui', bg: '#fffbeb', color: '#d97706', icon: 'M21 13.255A23.931 23.931 0 0112 15c-3.183 0-6.22-.62-9-1.745M16 6V4a2 2 0 00-2-2h-4a2 2 0 00-2 2v2m4 6h.01M5 20h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z' },
+        { label: 'Accepted Quotes', value: acceptedQuotes, sub: quotes.length + ' total', href: '/quotes-ui', bg: '#f0f9ff', color: '#0ea5e9', icon: 'M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z' },
+        { label: 'Revenue', value: CRM.formatCurrency(revenue), sub: completedJobs.length + ' completed jobs', href: '/jobs-ui', bg: '#f0fdfa', color: '#0f766e', icon: 'M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z' },
+        { label: 'Active Automations', value: activeAutomations, sub: automations.length + ' total', href: '/automations-ui', bg: '#fdf2f8', color: '#9333ea', icon: 'M13 10V3L4 14h7v7l9-11h-7z' },
+      ].map(function(m) {
+        return '<a class="metric-card" href="' + m.href + '">' +
+          '<div class="metric-top">' +
+          '<span class="metric-label">' + m.label + '</span>' +
+          '<div class="metric-icon" style="background:' + m.bg + ';color:' + m.color + '">' +
+          '<svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8"><path stroke-linecap="round" stroke-linejoin="round" d="' + m.icon + '"/></svg>' +
+          '</div></div>' +
+          '<div class="metric-value">' + m.value + '</div>' +
+          '<div class="metric-sub">' + m.sub + '</div>' +
+          '</a>';
+      }).join('');
+
+      // Pipeline panel
+      if (pipeline.length) {
+        const stageMap = {};
+        leads.forEach(function(l) { stageMap[l.pipeline_stage] = (stageMap[l.pipeline_stage] || 0) + 1; });
+        document.getElementById('pipeline-panel').innerHTML = pipeline.map(function(s) {
+          const count = stageMap[s.name] || 0;
+          const pct = leads.length ? Math.round(count / leads.length * 100) : 0;
+          return '<div style="padding:10px 14px;border-bottom:1px solid var(--border-subtle);display:flex;align-items:center;gap:10px">' +
+            '<div style="flex:1;min-width:0">' +
+            '<div style="font-size:13px;font-weight:500;margin-bottom:3px">' + s.name + '</div>' +
+            '<div style="height:4px;background:var(--bg);border-radius:2px;overflow:hidden">' +
+            '<div style="height:100%;width:' + pct + '%;background:var(--accent);border-radius:2px;transition:width .3s"></div>' +
+            '</div></div>' +
+            '<span style="font-size:13px;font-weight:600;color:var(--text-secondary);min-width:20px;text-align:right">' + count + '</span>' +
+            '</div>';
+        }).join('');
+      } else {
+        document.getElementById('pipeline-panel').innerHTML = '<div style="padding:16px 14px;font-size:13px;color:var(--text-tertiary)"><a href="/pipeline-ui" style="color:var(--accent)">Configure your pipeline stages</a> to see the overview here.</div>';
+      }
+
+      // Recent Jobs
+      const recentJobs = jobs.slice(0, 5);
+      if (recentJobs.length) {
+        const statusColors = { scheduled: '#d97706', in_progress: '#2563eb', completed: '#16a34a', cancelled: '#dc2626' };
+        document.getElementById('jobs-panel').innerHTML = recentJobs.map(function(j) {
+          return '<div style="padding:10px 14px;border-bottom:1px solid var(--border-subtle);display:flex;align-items:center;gap:10px">' +
+            '<div style="width:6px;height:6px;border-radius:50%;background:' + (statusColors[j.status]||'#9ca3af') + ';flex-shrink:0"></div>' +
+            '<div style="flex:1;font-size:13px;font-weight:500">' + (j.service_type||'Job') + '</div>' +
+            '<div style="font-size:12px;color:var(--text-tertiary)">' + CRM.formatDate(j.scheduled_date) + '</div>' +
+            '<div style="font-size:13px;font-weight:600">' + CRM.formatCurrency(j.price) + '</div>' +
+            '</div>';
+        }).join('');
+      } else {
+        document.getElementById('jobs-panel').innerHTML = '<div style="padding:16px 14px;font-size:13px;color:var(--text-tertiary)">No jobs yet. <a href="/jobs-ui" style="color:var(--accent)">Schedule one →</a></div>';
+      }
+
+    } catch(err) { CRM.toast(err.message, 'error'); }
+  }
+
+  load();
+</script>
 </body>
 </html>

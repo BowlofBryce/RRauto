@@ -1,0 +1,367 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Automations — CRM</title>
+  <link rel="stylesheet" href="/crm.css" />
+  <style>
+    .automation-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 16px 18px;
+      display: flex;
+      align-items: flex-start;
+      gap: 14px;
+      transition: box-shadow 0.15s;
+      cursor: pointer;
+    }
+    .automation-card:hover { box-shadow: var(--shadow-sm); }
+    .automation-icon {
+      width: 36px;
+      height: 36px;
+      border-radius: var(--radius-sm);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+    }
+    .automation-icon svg { width: 16px; height: 16px; }
+    .automation-info { flex: 1; min-width: 0; }
+    .automation-name { font-size: 13px; font-weight: 600; color: var(--text-primary); margin-bottom: 2px; }
+    .automation-trigger { font-size: 12px; color: var(--text-tertiary); margin-bottom: 6px; }
+    .automation-steps { font-size: 12px; color: var(--text-secondary); }
+    .automation-step-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      padding: 2px 8px;
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: 4px;
+      font-size: 11px;
+      color: var(--text-secondary);
+      margin: 2px;
+    }
+    .automations-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(360px, 1fr));
+      gap: 10px;
+    }
+  </style>
+</head>
+<body>
+<script src="/crm.js"></script>
+<div class="layout">
+  <div id="sidebar-mount"></div>
+  <div class="main">
+    <div class="topbar">
+      <span class="topbar-title">Automations</span>
+      <span id="count-badge" class="badge badge-gray" style="font-size:11px">0</span>
+      <div class="topbar-spacer"></div>
+      <button class="btn btn-secondary" onclick="installDefaults()">
+        <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/></svg>
+        Install Defaults
+      </button>
+      <button class="btn btn-primary" onclick="CRM.openModal('new-modal')">
+        <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4"/></svg>
+        New Automation
+      </button>
+    </div>
+    <div class="content">
+      <div id="automations-grid" class="automations-grid">
+        <div style="padding:24px;color:var(--text-tertiary);font-size:13px">Loading…</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Detail Panel -->
+<div id="panel-backdrop" onclick="closePanel()" style="display:none;position:fixed;inset:0;z-index:40"></div>
+<div class="detail-panel" id="detail-panel">
+  <div class="detail-header">
+    <div class="detail-title" id="dp-name">Automation</div>
+    <button class="modal-close" onclick="closePanel()"><svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/></svg></button>
+  </div>
+  <div class="detail-body">
+    <div class="detail-field">
+      <div class="detail-field-label">Status</div>
+      <div style="display:flex;align-items:center;gap:10px;margin-top:4px">
+        <label class="toggle">
+          <input type="checkbox" id="dp-toggle" onchange="toggleAutomation()" />
+          <div class="toggle-track"></div>
+        </label>
+        <span id="dp-status-label" style="font-size:13px;color:var(--text-secondary)">Inactive</span>
+      </div>
+    </div>
+    <div class="detail-field"><div class="detail-field-label">Trigger</div><div class="detail-field-value" id="dp-trigger">—</div></div>
+    <div class="detail-field">
+      <div class="detail-field-label">Steps</div>
+      <div id="dp-steps" style="margin-top:6px;display:flex;flex-direction:column;gap:8px"></div>
+    </div>
+    <div class="detail-field"><div class="detail-field-label">Created</div><div class="detail-field-value" id="dp-created">—</div></div>
+    <hr class="divider" />
+    <button class="btn btn-danger btn-sm" style="width:100%" onclick="deleteAutomation()">Delete Automation</button>
+  </div>
+</div>
+
+<!-- New Automation Modal -->
+<div class="modal-overlay" id="new-modal">
+  <div class="modal modal-lg">
+    <div class="modal-header">
+      <div class="modal-title">New Automation</div>
+      <button class="modal-close" onclick="CRM.closeModal('new-modal')"><svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/></svg></button>
+    </div>
+    <form id="new-form">
+      <div class="modal-body">
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label">Name *</label>
+            <input class="form-input" id="n-name" required placeholder="e.g. Lead Response" />
+          </div>
+          <div class="form-group">
+            <label class="form-label">Trigger *</label>
+            <select class="form-input" id="n-trigger" required>
+              <option value="lead_created">Lead Created</option>
+              <option value="quote_sent">Quote Sent</option>
+              <option value="job_scheduled">Job Scheduled</option>
+              <option value="job_completed">Job Completed</option>
+              <option value="customer_inactive">Customer Inactive</option>
+              <option value="missed_call">Missed Call</option>
+            </select>
+          </div>
+        </div>
+        <div class="section-heading" style="margin-top:4px">Steps</div>
+        <div id="steps-editor"></div>
+        <button type="button" class="btn btn-secondary btn-sm" onclick="addStep()" style="margin-top:6px">+ Add Step</button>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" onclick="CRM.closeModal('new-modal')">Cancel</button>
+        <button type="submit" class="btn btn-primary">Create Automation</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<script>
+  document.getElementById('sidebar-mount').outerHTML = CRM.buildSidebar('automations');
+
+  let automations = [], selected = null;
+  let newSteps = [{ delay_minutes: 0, action: 'send_sms', payload: {} }];
+
+  const triggerLabels = {
+    lead_created: 'Lead Created',
+    quote_sent: 'Quote Sent',
+    job_scheduled: 'Job Scheduled',
+    job_completed: 'Job Completed',
+    customer_inactive: 'Customer Inactive',
+    missed_call: 'Missed Call',
+  };
+
+  const actionLabels = {
+    send_sms: 'Send SMS',
+    send_email: 'Send Email',
+    create_task: 'Create Task',
+    update_pipeline_stage: 'Update Stage',
+  };
+
+  const iconColors = {
+    lead_created: { bg: '#dcfce7', color: '#15803d' },
+    quote_sent: { bg: '#dbeafe', color: '#1d4ed8' },
+    job_scheduled: { bg: '#fef9c3', color: '#a16207' },
+    job_completed: { bg: '#ccfbf1', color: '#0f766e' },
+    customer_inactive: { bg: '#ffedd5', color: '#c2410c' },
+    missed_call: { bg: '#fee2e2', color: '#dc2626' },
+  };
+
+  function renderGrid() {
+    const grid = document.getElementById('automations-grid');
+    if (!automations.length) {
+      grid.innerHTML = '<div style="grid-column:span 2"><div class="empty-state"><svg class="empty-icon" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg><div class="empty-title">No automations yet</div><div class="empty-sub">Install the default templates or create a custom automation</div><button class="btn btn-primary" style="margin-top:8px" onclick="installDefaults()">Install Default Templates</button></div></div>';
+      return;
+    }
+    grid.innerHTML = automations.map(function(a) {
+      const ic = iconColors[a.trigger] || { bg: '#f3f4f6', color: '#6b7280' };
+      const steps = Array.isArray(a.steps) ? a.steps : [];
+      return '<div class="automation-card" onclick="openDetail(\'' + a.id + '\')">' +
+        '<div class="automation-icon" style="background:' + ic.bg + ';color:' + ic.color + '">' +
+        '<svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>' +
+        '</div>' +
+        '<div class="automation-info">' +
+        '<div class="automation-name">' + a.name + '</div>' +
+        '<div class="automation-trigger">Trigger: ' + (triggerLabels[a.trigger] || a.trigger) + '</div>' +
+        '<div class="automation-steps">' +
+        steps.map(function(s) {
+          return '<span class="automation-step-pill">' + (actionLabels[s.action] || s.action) + (s.delay_minutes > 0 ? ' +' + s.delay_minutes + 'm' : '') + '</span>';
+        }).join('') +
+        '</div>' +
+        '</div>' +
+        '<div style="flex-shrink:0">' +
+        (a.is_active
+          ? '<span class="badge badge-green">Active</span>'
+          : '<span class="badge badge-gray">Inactive</span>') +
+        '</div>' +
+        '</div>';
+    }).join('');
+  }
+
+  function addStep() {
+    newSteps.push({ delay_minutes: 0, action: 'send_sms', payload: {} });
+    renderStepsEditor();
+  }
+
+  function removeStep(i) {
+    newSteps.splice(i, 1);
+    renderStepsEditor();
+  }
+
+  function renderStepsEditor() {
+    const el = document.getElementById('steps-editor');
+    el.innerHTML = newSteps.map(function(step, i) {
+      const isSMS = step.action === 'send_sms';
+      const isEmail = step.action === 'send_email';
+      const isTask = step.action === 'create_task';
+      const isStage = step.action === 'update_pipeline_stage';
+      return '<div style="background:var(--bg);border:1px solid var(--border);border-radius:var(--radius-sm);padding:12px;margin-bottom:8px">' +
+        '<div class="form-row" style="margin-bottom:10px">' +
+        '<div class="form-group" style="margin-bottom:0">' +
+        '<label class="form-label">Action</label>' +
+        '<select class="form-input" id="step-action-' + i + '" onchange="updateStepAction(' + i + ')">' +
+        '<option value="send_sms"' + (isSMS?' selected':'') + '>Send SMS</option>' +
+        '<option value="send_email"' + (isEmail?' selected':'') + '>Send Email</option>' +
+        '<option value="create_task"' + (isTask?' selected':'') + '>Create Task</option>' +
+        '<option value="update_pipeline_stage"' + (isStage?' selected':'') + '>Update Pipeline Stage</option>' +
+        '</select></div>' +
+        '<div class="form-group" style="margin-bottom:0">' +
+        '<label class="form-label">Delay (minutes)</label>' +
+        '<input class="form-input" id="step-delay-' + i + '" type="number" min="0" value="' + step.delay_minutes + '" />' +
+        '</div></div>' +
+        (isSMS ? '<div class="form-group" style="margin-bottom:0"><label class="form-label">SMS Message</label><textarea class="form-input" id="step-msg-' + i + '" style="min-height:60px" placeholder="Hi {{contact_name}}…">' + (step.payload.message||'') + '</textarea></div>' : '') +
+        (isEmail ? '<div class="form-group"><label class="form-label">Subject</label><input class="form-input" id="step-subj-' + i + '" value="' + (step.payload.subject||'') + '" /></div><div class="form-group" style="margin-bottom:0"><label class="form-label">Body</label><textarea class="form-input" id="step-body-' + i + '" style="min-height:60px">' + (step.payload.body||'') + '</textarea></div>' : '') +
+        (isTask ? '<div class="form-group" style="margin-bottom:0"><label class="form-label">Task Title</label><input class="form-input" id="step-title-' + i + '" value="' + (step.payload.title||'') + '" /></div>' : '') +
+        (isStage ? '<div class="form-group" style="margin-bottom:0"><label class="form-label">Stage Name</label><input class="form-input" id="step-stage-' + i + '" value="' + (step.payload.stage||'') + '" /></div>' : '') +
+        '<div style="text-align:right;margin-top:8px"><button type="button" class="btn btn-ghost btn-sm" onclick="removeStep(' + i + ')" style="color:var(--danger)">Remove Step</button></div>' +
+        '</div>';
+    }).join('');
+  }
+
+  function updateStepAction(i) {
+    newSteps[i].action = document.getElementById('step-action-' + i).value;
+    newSteps[i].payload = {};
+    renderStepsEditor();
+  }
+
+  function collectSteps() {
+    return newSteps.map(function(step, i) {
+      const action = document.getElementById('step-action-' + i).value;
+      const delay = parseInt(document.getElementById('step-delay-' + i).value) || 0;
+      let payload = {};
+      if (action === 'send_sms') payload.message = document.getElementById('step-msg-' + i)?.value || '';
+      if (action === 'send_email') {
+        payload.subject = document.getElementById('step-subj-' + i)?.value || '';
+        payload.body = document.getElementById('step-body-' + i)?.value || '';
+      }
+      if (action === 'create_task') payload.title = document.getElementById('step-title-' + i)?.value || '';
+      if (action === 'update_pipeline_stage') payload.stage = document.getElementById('step-stage-' + i)?.value || '';
+      return { action, delay_minutes: delay, payload };
+    });
+  }
+
+  function openDetail(id) {
+    selected = automations.find(a => a.id === id);
+    if (!selected) return;
+    document.getElementById('dp-name').textContent = selected.name;
+    document.getElementById('dp-trigger').textContent = triggerLabels[selected.trigger] || selected.trigger;
+    document.getElementById('dp-toggle').checked = selected.is_active;
+    document.getElementById('dp-status-label').textContent = selected.is_active ? 'Active' : 'Inactive';
+    document.getElementById('dp-created').textContent = CRM.formatDate(selected.created_at);
+    const steps = Array.isArray(selected.steps) ? selected.steps : [];
+    document.getElementById('dp-steps').innerHTML = steps.map(function(s, i) {
+      return '<div style="background:var(--bg);border:1px solid var(--border);border-radius:var(--radius-sm);padding:10px">' +
+        '<div style="font-size:11px;font-weight:600;color:var(--text-tertiary);text-transform:uppercase;letter-spacing:.4px;margin-bottom:4px">Step ' + (i+1) + ' — ' + (actionLabels[s.action]||s.action) + (s.delay_minutes?' (+' + s.delay_minutes + ' min)':'') + '</div>' +
+        '<div style="font-size:12px;color:var(--text-secondary)">' +
+        (s.payload.message ? s.payload.message : s.payload.subject ? s.payload.subject : s.payload.title || s.payload.stage || '—') +
+        '</div></div>';
+    }).join('') || '<div style="font-size:13px;color:var(--text-tertiary)">No steps defined</div>';
+    document.getElementById('detail-panel').classList.add('open');
+    document.getElementById('panel-backdrop').style.display = 'block';
+  }
+
+  function closePanel() {
+    document.getElementById('detail-panel').classList.remove('open');
+    document.getElementById('panel-backdrop').style.display = 'none';
+  }
+
+  async function toggleAutomation() {
+    if (!selected) return;
+    const is_active = document.getElementById('dp-toggle').checked;
+    document.getElementById('dp-status-label').textContent = is_active ? 'Active' : 'Inactive';
+    try {
+      await CRM.api('/automations/' + selected.id, { method: 'PATCH', body: JSON.stringify({ is_active }) });
+      selected.is_active = is_active;
+      const card = automations.find(a => a.id === selected.id);
+      if (card) card.is_active = is_active;
+      renderGrid();
+      CRM.toast(is_active ? 'Automation enabled' : 'Automation disabled', 'success');
+    } catch(err) {
+      document.getElementById('dp-toggle').checked = !is_active;
+      document.getElementById('dp-status-label').textContent = !is_active ? 'Active' : 'Inactive';
+      CRM.toast(err.message, 'error');
+    }
+  }
+
+  async function deleteAutomation() {
+    if (!selected || !confirm('Delete "' + selected.name + '"? This cannot be undone.')) return;
+    try {
+      await CRM.api('/automations/' + selected.id, { method: 'DELETE' });
+      closePanel();
+      CRM.toast('Automation deleted', 'success');
+      await load();
+    } catch(err) { CRM.toast(err.message, 'error'); }
+  }
+
+  async function installDefaults() {
+    try {
+      const result = await CRM.api('/automations/install-defaults', { method: 'POST' });
+      CRM.toast('Installed ' + (result.installed || 0) + ' default automations', 'success');
+      await load();
+    } catch(err) { CRM.toast(err.message, 'error'); }
+  }
+
+  document.getElementById('new-form').addEventListener('submit', async function(e) {
+    e.preventDefault();
+    const body = {
+      name: document.getElementById('n-name').value,
+      trigger: document.getElementById('n-trigger').value,
+      is_active: true,
+      conditions: [],
+      steps: collectSteps(),
+    };
+    try {
+      await CRM.api('/automations', { method: 'POST', body: JSON.stringify(body) });
+      newSteps = [{ delay_minutes: 0, action: 'send_sms', payload: {} }];
+      CRM.closeModal('new-modal');
+      CRM.toast('Automation created', 'success');
+      await load();
+    } catch(err) { CRM.toast(err.message, 'error'); }
+  });
+
+  document.getElementById('new-modal').addEventListener('transitionend', function() {
+    if (this.classList.contains('open')) {
+      renderStepsEditor();
+    }
+  });
+
+  async function load() {
+    try {
+      automations = await CRM.api('/automations');
+      document.getElementById('count-badge').textContent = automations.length;
+      renderGrid();
+    } catch(err) { CRM.toast(err.message, 'error'); }
+  }
+
+  load();
+</script>
+</body>
+</html>

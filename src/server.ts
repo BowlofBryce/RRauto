@@ -17,6 +17,8 @@ const __dirname = dirname(fileURLToPath(import.meta.url));
 const app = express();
 app.use(express.json());
 
+app.use(express.static(join(__dirname, "public")));
+
 app.get("/health", (_req, res) => {
   res.json({ ok: true });
 });
@@ -33,11 +35,14 @@ app.get("/login", (_req, res) => {
   res.send(html);
 });
 
-app.get("/dashboard", (_req, res) => {
-  const html = readFileSync(join(__dirname, "public/dashboard.html"), "utf8");
-  res.setHeader("Content-Type", "text/html");
-  res.send(html);
-});
+const uiPages = ["dashboard", "contacts-ui", "leads-ui", "jobs-ui", "quotes-ui", "pipeline-ui", "communications-ui", "automations-ui"];
+
+for (const page of uiPages) {
+  app.get(`/${page}`, (_req, res) => {
+    res.setHeader("Content-Type", "text/html");
+    res.sendFile(join(__dirname, `public/${page}.html`));
+  });
+}
 
 app.use(withAuthOrBusinessScope);
 

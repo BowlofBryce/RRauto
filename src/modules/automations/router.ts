@@ -55,6 +55,34 @@ automationsRouter.post("/queue/process", async (_req, res) => {
   res.json({ processed });
 });
 
+automationsRouter.patch("/:id", async (req, res) => {
+  const businessId = (req as unknown as ScopedRequest).businessId;
+  const { is_active, name } = req.body;
+  const sets: string[] = [];
+  const values: unknown[] = [req.params.id, businessId];
+
+  if (is_active !== undefined) { sets.push(`is_active = $${values.length + 1}`); values.push(is_active); }
+  if (name !== undefined) { sets.push(`name = $${values.length + 1}`); values.push(name); }
+
+  if (!sets.length) { res.status(400).json({ error: "Nothing to update" }); return; }
+
+  const { rows } = await db.query(
+    `UPDATE automations SET ${sets.join(", ")} WHERE id = $1 AND business_id = $2 RETURNING *`,
+    values
+  );
+  if (!rows[0]) { res.status(404).json({ error: "Not found" }); return; }
+  res.json(rows[0]);
+});
+
+automationsRouter.delete("/:id", async (req, res) => {
+  const { rows } = await db.query(
+    "DELETE FROM automations WHERE id = $1 AND business_id = $2 RETURNING id",
+    [req.params.id, (req as unknown as ScopedRequest).businessId]
+  );
+  if (!rows[0]) { res.status(404).json({ error: "Not found" }); return; }
+  res.status(204).send();
+});
+
 automationsRouter.post("/events/missed-call", async (req, res) => {
   const businessId = (req as ScopedRequest).businessId;
   const { contact_id } = req.body;

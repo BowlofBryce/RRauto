@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Communications — CRM</title>
+  <link rel="stylesheet" href="/crm.css" />
+</head>
+<body>
+<script src="/crm.js"></script>
+<div class="layout">
+  <div id="sidebar-mount"></div>
+  <div class="main">
+    <div class="topbar">
+      <span class="topbar-title">Communications</span>
+      <span id="count-badge" class="badge badge-gray" style="font-size:11px">0</span>
+      <div class="topbar-spacer"></div>
+      <div class="filter-bar" style="margin-bottom:0">
+        <span class="filter-chip active" onclick="setFilter('all',this)">All</span>
+        <span class="filter-chip" onclick="setFilter('sms',this)">SMS</span>
+        <span class="filter-chip" onclick="setFilter('email',this)">Email</span>
+        <span class="filter-chip" onclick="setFilter('sent',this)">Sent</span>
+        <span class="filter-chip" onclick="setFilter('received',this)">Received</span>
+      </div>
+      <button class="btn btn-primary" onclick="CRM.openModal('new-modal')">
+        <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4"/></svg>
+        Log Message
+      </button>
+    </div>
+    <div class="content">
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Type</th>
+              <th>Direction</th>
+              <th>Contact ID</th>
+              <th>Message</th>
+              <th>Sent At</th>
+            </tr>
+          </thead>
+          <tbody id="tbody"></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Detail Panel -->
+<div id="panel-backdrop" onclick="closePanel()" style="display:none;position:fixed;inset:0;z-index:40"></div>
+<div class="detail-panel" id="detail-panel">
+  <div class="detail-header">
+    <div class="detail-title">Message Detail</div>
+    <button class="modal-close" onclick="closePanel()"><svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/></svg></button>
+  </div>
+  <div class="detail-body">
+    <div class="detail-field"><div class="detail-field-label">Type</div><div class="detail-field-value" id="dp-type">—</div></div>
+    <div class="detail-field"><div class="detail-field-label">Direction</div><div class="detail-field-value" id="dp-direction">—</div></div>
+    <div class="detail-field"><div class="detail-field-label">Contact ID</div><div class="detail-field-value" id="dp-contact" style="font-family:monospace;font-size:12px">—</div></div>
+    <div class="detail-field"><div class="detail-field-label">Automation ID</div><div class="detail-field-value" id="dp-automation" style="font-family:monospace;font-size:12px">—</div></div>
+    <div class="detail-field"><div class="detail-field-label">Sent At</div><div class="detail-field-value" id="dp-sent">—</div></div>
+    <div class="detail-field">
+      <div class="detail-field-label">Message</div>
+      <div class="detail-field-value" id="dp-message" style="white-space:pre-wrap;background:var(--bg);padding:10px;border-radius:var(--radius-sm);border:1px solid var(--border);margin-top:4px;font-size:13px;line-height:1.6">—</div>
+    </div>
+  </div>
+</div>
+
+<!-- New Message Modal -->
+<div class="modal-overlay" id="new-modal">
+  <div class="modal">
+    <div class="modal-header">
+      <div class="modal-title">Log Message</div>
+      <button class="modal-close" onclick="CRM.closeModal('new-modal')"><svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/></svg></button>
+    </div>
+    <form id="new-form">
+      <div class="modal-body">
+        <div class="form-group"><label class="form-label">Contact ID *</label><input class="form-input" id="n-contact" required placeholder="Paste contact UUID" /></div>
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label">Type</label>
+            <select class="form-input" id="n-type">
+              <option value="sms">SMS</option>
+              <option value="email">Email</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Direction</label>
+            <select class="form-input" id="n-direction">
+              <option value="sent">Sent</option>
+              <option value="received">Received</option>
+            </select>
+          </div>
+        </div>
+        <div class="form-group"><label class="form-label">Message *</label><textarea class="form-input" id="n-message" required placeholder="Message content…" style="min-height:100px"></textarea></div>
+        <div class="form-group"><label class="form-label">Sent At</label><input class="form-input" id="n-sent" type="datetime-local" /></div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" onclick="CRM.closeModal('new-modal')">Cancel</button>
+        <button type="submit" class="btn btn-primary">Log Message</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<script>
+  document.getElementById('sidebar-mount').outerHTML = CRM.buildSidebar('communications');
+
+  let comms = [], selected = null, activeFilter = 'all';
+
+  function typeBadge(t) {
+    return t === 'sms'
+      ? '<span class="badge badge-teal">SMS</span>'
+      : '<span class="badge badge-blue">Email</span>';
+  }
+
+  function dirBadge(d) {
+    return d === 'sent'
+      ? '<span class="badge badge-gray">Sent</span>'
+      : '<span class="badge badge-green">Received</span>';
+  }
+
+  function render(data) {
+    const tbody = document.getElementById('tbody');
+    if (!data.length) {
+      tbody.innerHTML = '<tr><td colspan="5"><div class="empty-state"><svg class="empty-icon" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"/></svg><div class="empty-title">No messages logged</div><div class="empty-sub">Log a message to track your communications</div></div></td></tr>';
+      return;
+    }
+    tbody.innerHTML = data.map(c => '<tr onclick="openDetail(\'' + c.id + '\')">' +
+      '<td>' + typeBadge(c.type) + '</td>' +
+      '<td>' + dirBadge(c.direction) + '</td>' +
+      '<td style="font-family:monospace;font-size:11px;color:var(--text-tertiary)">' + (c.contact_id||'').slice(0,8) + '…</td>' +
+      '<td class="cell-muted" style="max-width:300px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">' + (c.message || '—') + '</td>' +
+      '<td class="cell-muted cell-sm">' + CRM.formatDate(c.sent_at) + '</td>' +
+      '</tr>').join('');
+  }
+
+  function setFilter(f, el) {
+    activeFilter = f;
+    document.querySelectorAll('.filter-chip').forEach(c => c.classList.remove('active'));
+    el.classList.add('active');
+    let filtered = comms;
+    if (f === 'sms') filtered = comms.filter(c => c.type === 'sms');
+    else if (f === 'email') filtered = comms.filter(c => c.type === 'email');
+    else if (f === 'sent') filtered = comms.filter(c => c.direction === 'sent');
+    else if (f === 'received') filtered = comms.filter(c => c.direction === 'received');
+    document.getElementById('count-badge').textContent = filtered.length;
+    render(filtered);
+  }
+
+  function openDetail(id) {
+    selected = comms.find(c => c.id === id);
+    if (!selected) return;
+    document.getElementById('dp-type').innerHTML = typeBadge(selected.type);
+    document.getElementById('dp-direction').innerHTML = dirBadge(selected.direction);
+    document.getElementById('dp-contact').textContent = selected.contact_id || '—';
+    document.getElementById('dp-automation').textContent = selected.automation_id || '—';
+    document.getElementById('dp-sent').textContent = CRM.formatDate(selected.sent_at);
+    document.getElementById('dp-message').textContent = selected.message || '—';
+    document.getElementById('detail-panel').classList.add('open');
+    document.getElementById('panel-backdrop').style.display = 'block';
+  }
+
+  function closePanel() {
+    document.getElementById('detail-panel').classList.remove('open');
+    document.getElementById('panel-backdrop').style.display = 'none';
+  }
+
+  document.getElementById('new-form').addEventListener('submit', async function(e) {
+    e.preventDefault();
+    const body = {
+      contact_id: document.getElementById('n-contact').value,
+      type: document.getElementById('n-type').value,
+      direction: document.getElementById('n-direction').value,
+      message: document.getElementById('n-message').value,
+      sent_at: document.getElementById('n-sent').value || new Date().toISOString(),
+    };
+    try {
+      await CRM.api('/communications', { method: 'POST', body: JSON.stringify(body) });
+      CRM.closeModal('new-modal');
+      CRM.toast('Message logged', 'success');
+      await load();
+    } catch(err) { CRM.toast(err.message, 'error'); }
+  });
+
+  async function load() {
+    try {
+      comms = await CRM.api('/communications');
+      document.getElementById('count-badge').textContent = comms.length;
+      render(comms);
+    } catch(err) { CRM.toast(err.message, 'error'); }
+  }
+
+  load();
+</script>
+</body>
+</html>

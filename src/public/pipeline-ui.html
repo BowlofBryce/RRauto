@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Pipeline — CRM</title>
+  <link rel="stylesheet" href="/crm.css" />
+</head>
+<body>
+<script src="/crm.js"></script>
+<div class="layout">
+  <div id="sidebar-mount"></div>
+  <div class="main">
+    <div class="topbar">
+      <span class="topbar-title">Pipeline</span>
+      <div class="topbar-spacer"></div>
+      <button class="btn btn-secondary" onclick="CRM.openModal('edit-stages-modal')">
+        <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/><path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
+        Configure Stages
+      </button>
+    </div>
+    <div class="content" style="overflow-x:auto">
+      <div class="board" id="board">
+        <div style="display:flex;align-items:center;justify-content:center;width:100%;padding:40px;color:var(--text-tertiary);font-size:13px">Loading pipeline…</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Configure Stages Modal -->
+<div class="modal-overlay" id="edit-stages-modal">
+  <div class="modal modal-lg">
+    <div class="modal-header">
+      <div class="modal-title">Configure Pipeline Stages</div>
+      <button class="modal-close" onclick="CRM.closeModal('edit-stages-modal')"><svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/></svg></button>
+    </div>
+    <div class="modal-body">
+      <p style="font-size:13px;color:var(--text-secondary);margin-bottom:14px">Edit stage names below. Order top-to-bottom reflects left-to-right in the board.</p>
+      <div id="stages-editor"></div>
+      <button class="btn btn-secondary btn-sm" onclick="addStageRow()" style="margin-top:10px">+ Add Stage</button>
+    </div>
+    <div class="modal-footer">
+      <button type="button" class="btn btn-secondary" onclick="CRM.closeModal('edit-stages-modal')">Cancel</button>
+      <button type="button" class="btn btn-primary" onclick="saveStages()">Save Stages</button>
+    </div>
+  </div>
+</div>
+
+<script>
+  document.getElementById('sidebar-mount').outerHTML = CRM.buildSidebar('pipeline');
+
+  let stages = [], leads = [];
+
+  function renderBoard() {
+    const board = document.getElementById('board');
+    if (!stages.length) {
+      board.innerHTML = '<div style="display:flex;flex-direction:column;align-items:center;gap:12px;padding:60px;color:var(--text-tertiary)">' +
+        '<svg style="width:36px;height:36px;opacity:.4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/></svg>' +
+        '<div style="font-size:14px;font-weight:600;color:var(--text-secondary)">No stages configured</div>' +
+        '<div style="font-size:13px">Click "Configure Stages" to set up your pipeline</div>' +
+        '<button class="btn btn-primary" onclick="installDefaultStages()">Install Default Stages</button>' +
+        '</div>';
+      return;
+    }
+
+    board.innerHTML = stages.map(function(stage) {
+      const stageLeads = leads.filter(l => l.pipeline_stage === stage.name);
+      return '<div class="board-col">' +
+        '<div class="board-col-header">' +
+        '<span class="board-col-title">' + stage.name + '</span>' +
+        '<span class="board-col-count">' + stageLeads.length + '</span>' +
+        '</div>' +
+        '<div class="board-cards">' +
+        (stageLeads.length ? stageLeads.map(function(l) {
+          return '<div class="board-card" onclick="moveLead(\'' + l.id + '\')">' +
+            '<div class="board-card-name">' + (l.source || 'Lead') + '</div>' +
+            '<div class="board-card-meta">' + CRM.statusBadge(l.status) + '</div>' +
+            '</div>';
+        }).join('') : '<div style="padding:8px 0;font-size:12px;color:var(--text-tertiary);text-align:center">No leads</div>') +
+        '</div>' +
+        '</div>';
+    }).join('');
+  }
+
+  async function installDefaultStages() {
+    const defaults = [
+      { name: 'New Lead', stage_order: 1 },
+      { name: 'Contacted', stage_order: 2 },
+      { name: 'Quoted', stage_order: 3 },
+      { name: 'Scheduled', stage_order: 4 },
+      { name: 'Completed', stage_order: 5 },
+    ];
+    try {
+      stages = await CRM.api('/pipeline', { method: 'PUT', body: JSON.stringify({ stages: defaults }) });
+      renderBoard();
+      renderStagesEditor();
+      CRM.toast('Default stages installed', 'success');
+    } catch(err) { CRM.toast(err.message, 'error'); }
+  }
+
+  function renderStagesEditor() {
+    const editor = document.getElementById('stages-editor');
+    editor.innerHTML = stages.map(function(s, i) {
+      return '<div class="form-group" style="display:flex;gap:8px;align-items:center">' +
+        '<input class="form-input" style="flex:1" value="' + s.name + '" data-idx="' + i + '" />' +
+        '<button type="button" class="btn btn-ghost btn-sm" onclick="removeStageRow(' + i + ')" style="color:var(--danger)">Remove</button>' +
+        '</div>';
+    }).join('');
+  }
+
+  function addStageRow() {
+    stages.push({ name: 'New Stage', stage_order: stages.length + 1 });
+    renderStagesEditor();
+  }
+
+  function removeStageRow(idx) {
+    stages.splice(idx, 1);
+    renderStagesEditor();
+  }
+
+  async function saveStages() {
+    const inputs = document.querySelectorAll('#stages-editor input');
+    const newStages = Array.from(inputs).map(function(inp, i) {
+      return { name: inp.value.trim(), stage_order: i + 1 };
+    }).filter(s => s.name);
+    try {
+      stages = await CRM.api('/pipeline', { method: 'PUT', body: JSON.stringify({ stages: newStages }) });
+      CRM.closeModal('edit-stages-modal');
+      renderBoard();
+      CRM.toast('Pipeline stages saved', 'success');
+    } catch(err) { CRM.toast(err.message, 'error'); }
+  }
+
+  async function moveLead(leadId) {
+    const lead = leads.find(l => l.id === leadId);
+    if (!lead || !stages.length) return;
+    const currentIdx = stages.findIndex(s => s.name === lead.pipeline_stage);
+    const nextStage = stages[currentIdx + 1];
+    if (!nextStage) { CRM.toast('Already at final stage', ''); return; }
+    try {
+      await CRM.api('/leads/' + leadId, { method: 'PATCH', body: JSON.stringify({ pipeline_stage: nextStage.name }) });
+      lead.pipeline_stage = nextStage.name;
+      renderBoard();
+      CRM.toast('Lead moved to ' + nextStage.name, 'success');
+    } catch(err) { CRM.toast(err.message, 'error'); }
+  }
+
+  async function load() {
+    try {
+      [stages, leads] = await Promise.all([
+        CRM.api('/pipeline'),
+        CRM.api('/leads'),
+      ]);
+      renderBoard();
+      renderStagesEditor();
+    } catch(err) { CRM.toast(err.message, 'error'); }
+  }
+
+  load();
+</script>
+</body>
+</html>

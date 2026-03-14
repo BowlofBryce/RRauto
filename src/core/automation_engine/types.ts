@@ -21,7 +21,7 @@ export interface AutomationStep {
   next_step?: number;
 }
 
-export interface AutomationDefinition {
+export interface AutomationDefinition extends Record<string, unknown> {
   id: string;
   business_id: string;
   name: string;

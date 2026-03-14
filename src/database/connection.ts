@@ -1,14 +1,43 @@
-import { Pool, QueryResult, QueryResultRow } from "pg";
+import { createClient, SupabaseClient } from "@supabase/supabase-js";
 
-const pool = new Pool({
-  connectionString: process.env.DATABASE_URL
+const supabaseUrl = process.env.VITE_SUPABASE_URL ?? "";
+const serviceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY ?? "";
+const anonKey = process.env.VITE_SUPABASE_ANON_KEY ?? "";
+
+const key = serviceRoleKey || anonKey;
+
+if (!supabaseUrl || !key) {
+  throw new Error("Missing VITE_SUPABASE_URL or SUPABASE_SERVICE_ROLE_KEY / VITE_SUPABASE_ANON_KEY");
+}
+
+const supabase: SupabaseClient = createClient(supabaseUrl, key, {
+  auth: { persistSession: false }
 });
 
+function interpolate(sql: string, params: unknown[]): string {
+  if (params.length === 0) return sql;
+  let i = 0;
+  return sql.replace(/\$\d+/g, () => {
+    const val = params[i++];
+    if (val === null || val === undefined) return "NULL";
+    if (typeof val === "boolean") return val ? "true" : "false";
+    if (typeof val === "number") return String(val);
+    return `'${String(val).replace(/\\/g, "\\\\").replace(/'/g, "''")}'`;
+  });
+}
+
 export const db = {
-  query<T extends QueryResultRow = QueryResultRow>(text: string, params: unknown[] = []): Promise<QueryResult<T>> {
-    return pool.query<T>(text, params);
+  async query<T extends Record<string, unknown> = Record<string, unknown>>(
+    text: string,
+    params: unknown[] = []
+  ): Promise<{ rows: T[] }> {
+    const sql = interpolate(text, params);
+    const { data, error } = await (supabase.rpc as Function)("execute_sql", { query: sql });
+    if (error) throw new Error(`DB error: ${error.message}\nSQL: ${sql}`);
+    return { rows: (data as T[]) ?? [] };
   },
+
   close(): Promise<void> {
-    return pool.end();
+    return Promise.resolve();
   }
 };

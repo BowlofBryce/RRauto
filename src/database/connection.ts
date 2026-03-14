@@ -1,13 +1,13 @@
 import { createClient, SupabaseClient } from "@supabase/supabase-js";
 
-const supabaseUrl = process.env.VITE_SUPABASE_URL ?? "";
+const supabaseUrl = process.env.SUPABASE_URL ?? "";
 const serviceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY ?? "";
-const anonKey = process.env.VITE_SUPABASE_ANON_KEY ?? "";
+const anonKey = process.env.SUPABASE_ANON_KEY ?? "";
 
 const key = serviceRoleKey || anonKey;
 
 if (!supabaseUrl || !key) {
-  throw new Error("Missing VITE_SUPABASE_URL or SUPABASE_SERVICE_ROLE_KEY / VITE_SUPABASE_ANON_KEY");
+  throw new Error("Missing SUPABASE_URL or SUPABASE_SERVICE_ROLE_KEY / SUPABASE_ANON_KEY");
 }
 
 const supabase: SupabaseClient = createClient(supabaseUrl, key, {

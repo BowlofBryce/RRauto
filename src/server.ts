@@ -1,3 +1,4 @@
+import "dotenv/config";
 import express from "express";
 import { withBusinessScope } from "./shared/business-scope.js";
 import { contactsRouter } from "./modules/contacts/router.js";
@@ -10,6 +11,11 @@ import { pipelineRouter } from "./modules/pipeline/router.js";
 
 const app = express();
 app.use(express.json());
+
+app.get("/health", (_req, res) => {
+  res.json({ ok: true });
+});
+
 app.use(withBusinessScope);
 
 app.use("/contacts", contactsRouter);
@@ -19,10 +25,6 @@ app.use("/quotes", quotesRouter);
 app.use("/communications", communicationsRouter);
 app.use("/automations", automationsRouter);
 app.use("/pipeline", pipelineRouter);
-
-app.get("/health", (_req, res) => {
-  res.json({ ok: true });
-});
 
 app.use((error: Error, _req: express.Request, res: express.Response, _next: express.NextFunction) => {
   console.error(error);

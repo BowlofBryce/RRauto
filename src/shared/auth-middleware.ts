@@ -38,5 +38,11 @@ export async function withAuthOrBusinessScope(
     }
   }
 
-  res.status(400).json({ error: "Missing business scope. Provide x-business-id, business_id, or a valid Authorization bearer token." });
+  const acceptsHtml = req.header("Accept")?.includes("text/html");
+  if (acceptsHtml) {
+    res.redirect("/login");
+    return;
+  }
+
+  res.status(401).json({ error: "Unauthorized. Provide a valid Authorization bearer token or x-business-id header." });
 }

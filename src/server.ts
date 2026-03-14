@@ -21,6 +21,10 @@ app.get("/health", (_req, res) => {
   res.json({ ok: true });
 });
 
+app.get("/", (_req, res) => {
+  res.redirect("/login");
+});
+
 app.get("/login", (_req, res) => {
   const html = readFileSync(join(__dirname, "public/login.html"), "utf8")
     .replace("__SUPABASE_URL__", process.env.VITE_SUPABASE_URL ?? "")

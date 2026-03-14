@@ -10,35 +10,40 @@ interface Props {
   size?: 'sm' | 'md' | 'lg'
 }
 
-const sizes = { sm: 'max-w-sm', md: 'max-w-md', lg: 'max-w-lg' }
+const widths = { sm: 'max-w-sm', md: 'max-w-md', lg: 'max-w-lg' }
 
 export function Modal({ open, onClose, title, children, size = 'md' }: Props) {
   return (
     <AnimatePresence>
       {open && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+        <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-4">
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            transition={{ duration: 0.15 }}
-            className="absolute inset-0 bg-black/60 backdrop-blur-sm"
+            transition={{ duration: 0.18 }}
+            className="absolute inset-0"
+            style={{ backgroundColor: 'rgba(0,0,0,0.55)', backdropFilter: 'blur(4px)' }}
             onClick={onClose}
           />
           <motion.div
-            initial={{ opacity: 0, scale: 0.95, y: 10 }}
+            initial={{ opacity: 0, scale: 0.96, y: 12 }}
             animate={{ opacity: 1, scale: 1, y: 0 }}
-            exit={{ opacity: 0, scale: 0.95, y: 10 }}
-            transition={{ type: 'spring', stiffness: 420, damping: 32 }}
-            className={`relative z-10 w-full ${sizes[size]} bg-surface-2 border border-border rounded-xl shadow-panel overflow-hidden`}
+            exit={{ opacity: 0, scale: 0.97, y: 6 }}
+            transition={{ type: 'spring', stiffness: 500, damping: 36, mass: 0.8 }}
+            className={`relative z-10 w-full ${widths[size]} bg-raised rounded-2xl shadow-app-xl overflow-hidden`}
+            style={{ border: '1px solid var(--border)' }}
           >
-            <div className="flex items-center justify-between px-5 py-4 border-b border-border">
-              <h2 className="text-sm font-semibold text-text-primary">{title}</h2>
-              <button onClick={onClose} className="p-1 rounded text-text-disabled hover:text-text-primary hover:bg-surface-3 transition-colors">
+            <div className="flex items-center justify-between px-5 py-4" style={{ borderBottom: '1px solid var(--border)' }}>
+              <h2 className="text-[13px] font-semibold text-1">{title}</h2>
+              <button
+                onClick={onClose}
+                className="h-6 w-6 flex items-center justify-center rounded-md text-4 hover:text-2 hover:bg-subtle transition-colors"
+              >
                 <X size={14} />
               </button>
             </div>
-            <div className="px-5 py-4">{children}</div>
+            <div className="px-5 py-5">{children}</div>
           </motion.div>
         </div>
       )}

@@ -1,7 +1,8 @@
 import { useState } from 'react'
 import { motion } from 'motion/react'
-import { Building2, Smartphone, Globe, Copy, Check } from 'lucide-react'
+import { Building2, Smartphone, Globe, Copy, Check, Sun, Moon } from 'lucide-react'
 import { useBusiness } from '../context/BusinessContext'
+import { useTheme } from '../context/ThemeContext'
 import { supabase } from '../lib/supabase'
 import { PageHeader } from '../components/layout/PageHeader'
 import { Button } from '../components/ui/Button'
@@ -59,9 +60,9 @@ export function Settings() {
           <div className="grid grid-cols-2 gap-3">
             <Input label="Business Name" value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} />
             <div className="flex flex-col gap-1.5">
-              <label className="text-xs font-medium text-text-secondary">Industry</label>
+              <label className="text-xs font-medium text-2">Industry</label>
               <select value={form.industry} onChange={(e) => setForm({ ...form, industry: e.target.value })}
-                className="h-8 px-3 rounded-md text-sm text-text-primary bg-surface-3 border border-border focus:outline-none focus:ring-1 focus:ring-accent focus:border-accent transition-colors">
+                className="input-base h-8 px-3 rounded-lg text-[13px] focus:outline-none">
                 <option value="landscaping">Landscaping</option>
                 <option value="window_washing">Window Washing</option>
                 <option value="pressure_washing">Pressure Washing</option>
@@ -84,22 +85,32 @@ export function Settings() {
           <Input label="Google Review Link" value={form.review_link} onChange={(e) => setForm({ ...form, review_link: e.target.value })} placeholder="https://g.page/r/..." />
         </Section>
 
+        <Section title="Appearance" icon={Sun}>
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="text-[13px] font-medium text-1">Theme</p>
+              <p className="text-[12px] text-3 mt-0.5">Switch between light and dark mode</p>
+            </div>
+            <ThemeToggle />
+          </div>
+        </Section>
+
         <Section title="System" icon={Copy}>
           <div className="space-y-2">
-            <div className="flex items-center gap-3 bg-surface-3 rounded-lg px-3 py-2.5">
+            <div className="flex items-center gap-3 bg-subtle rounded-lg px-3 py-2.5">
               <div className="flex-1 min-w-0">
-                <p className="text-[10px] font-medium text-text-tertiary uppercase tracking-wide mb-0.5">Business ID</p>
-                <p className="text-xs font-mono text-text-secondary truncate">{business?.id}</p>
+                <p className="text-[10px] font-medium text-3 uppercase tracking-wide mb-0.5">Business ID</p>
+                <p className="text-xs font-mono text-2 truncate">{business?.id}</p>
               </div>
-              <button onClick={copyId} className="flex items-center gap-1 text-xs text-text-tertiary hover:text-text-primary transition-colors flex-shrink-0">
-                {copied ? <Check size={12} className="text-success" /> : <Copy size={12} />}
+              <button onClick={copyId} className="flex items-center gap-1 text-xs text-3 hover:text-1 transition-colors flex-shrink-0">
+                {copied ? <Check size={12} className="text-green" /> : <Copy size={12} />}
                 {copied ? 'Copied' : 'Copy'}
               </button>
             </div>
-            <div className="flex items-center gap-3 bg-surface-3 rounded-lg px-3 py-2.5">
+            <div className="flex items-center gap-3 bg-subtle rounded-lg px-3 py-2.5">
               <div>
-                <p className="text-[10px] font-medium text-text-tertiary uppercase tracking-wide mb-0.5">Slug</p>
-                <p className="text-xs font-mono text-text-secondary">{business?.slug}</p>
+                <p className="text-[10px] font-medium text-3 uppercase tracking-wide mb-0.5">Slug</p>
+                <p className="text-xs font-mono text-2">{business?.slug}</p>
               </div>
             </div>
           </div>
@@ -121,13 +132,39 @@ function Section({ title, icon: Icon, children }: { title: string; icon: Element
       initial={{ opacity: 0, y: 6 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.2 }}
-      className="bg-surface-2 border border-border rounded-xl overflow-hidden"
+      className="bg-raised border border-app rounded-xl overflow-hidden"
     >
-      <div className="flex items-center gap-2.5 px-5 py-3.5 border-b border-border">
-        <Icon size={14} className="text-text-tertiary" />
-        <h3 className="text-sm font-semibold text-text-primary">{title}</h3>
+      <div className="flex items-center gap-2.5 px-5 py-3.5 border-b border-app">
+        <Icon size={14} className="text-3" />
+        <h3 className="text-sm font-semibold text-1">{title}</h3>
       </div>
       <div className="px-5 py-4">{children}</div>
     </motion.div>
+  )
+}
+
+function ThemeToggle() {
+  const { theme, toggleTheme } = useTheme()
+  return (
+    <button
+      onClick={toggleTheme}
+      className="relative flex items-center h-8 w-[72px] rounded-full transition-colors duration-200 focus:outline-none"
+      style={{ backgroundColor: theme === 'dark' ? 'var(--brand)' : 'var(--muted)' }}
+    >
+      <motion.div
+        layout
+        transition={{ type: 'spring', stiffness: 500, damping: 35 }}
+        className="absolute flex items-center justify-center h-6 w-6 rounded-full shadow-app-sm"
+        style={{
+          left: theme === 'dark' ? 'calc(100% - 28px)' : '4px',
+          backgroundColor: 'var(--raised)',
+        }}
+      >
+        {theme === 'dark'
+          ? <Moon size={12} style={{ color: 'var(--brand)' }} />
+          : <Sun size={12} style={{ color: 'var(--fg-3)' }} />
+        }
+      </motion.div>
+    </button>
   )
 }

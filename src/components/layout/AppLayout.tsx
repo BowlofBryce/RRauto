@@ -5,7 +5,7 @@ import { Sidebar } from './Sidebar'
 export function AppLayout() {
   const { pathname } = useLocation()
   return (
-    <div className="flex h-screen bg-surface-0 overflow-hidden">
+    <div className="flex h-screen bg-app overflow-hidden">
       <Sidebar />
       <main className="flex-1 overflow-y-auto">
         <AnimatePresence mode="wait" initial={false}>

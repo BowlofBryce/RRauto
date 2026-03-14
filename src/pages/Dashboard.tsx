@@ -17,10 +17,10 @@ import type { JobWithContact } from '../modules/jobs/jobs.service'
 import type { Automation } from '../types/crm.types'
 
 type JobStatus = 'completed' | 'scheduled' | 'pending' | 'cancelled'
-const jobBadge: Record<JobStatus, 'success' | 'warning' | 'muted' | 'danger'> = {
+const jobBadge: Record<JobStatus, 'success' | 'warning' | 'neutral' | 'danger'> = {
   completed: 'success',
   scheduled: 'warning',
-  pending: 'muted',
+  pending: 'neutral',
   cancelled: 'danger',
 }
 
@@ -62,8 +62,8 @@ export function Dashboard() {
   return (
     <div className="max-w-5xl mx-auto">
       <div className="mb-8">
-        <h1 className="text-lg font-semibold text-text-primary">{business?.name ?? 'Dashboard'}</h1>
-        <p className="text-sm text-text-tertiary mt-0.5">Overview of your operations</p>
+        <h1 className="text-lg font-semibold text-1">{business?.name ?? 'Dashboard'}</h1>
+        <p className="text-sm text-3 mt-0.5">Overview of your operations</p>
       </div>
 
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 mb-8">
@@ -80,10 +80,10 @@ export function Dashboard() {
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-5 gap-4">
-        <div className="lg:col-span-3 bg-surface-2 border border-border rounded-xl overflow-hidden">
-          <div className="flex items-center justify-between px-5 py-4 border-b border-border">
-            <h2 className="text-sm font-semibold text-text-primary">Upcoming Jobs</h2>
-            <Link to="/jobs" className="flex items-center gap-1 text-xs text-text-tertiary hover:text-text-secondary transition-colors">
+        <div className="lg:col-span-3 bg-raised border border-app rounded-xl overflow-hidden">
+          <div className="flex items-center justify-between px-5 py-4 border-b border-app">
+            <h2 className="text-sm font-semibold text-1">Upcoming Jobs</h2>
+            <Link to="/jobs" className="flex items-center gap-1 text-xs text-3 hover:text-2 transition-colors">
               View all <ArrowRight size={11} />
             </Link>
           </div>
@@ -103,21 +103,21 @@ export function Dashboard() {
             </div>
           ) : upcoming.length === 0 ? (
             <div className="flex flex-col items-center py-12">
-              <Wrench size={18} className="text-text-disabled mb-2" />
-              <p className="text-sm text-text-tertiary">No upcoming jobs this week</p>
+              <Wrench size={18} className="text-4 mb-2" />
+              <p className="text-sm text-3">No upcoming jobs this week</p>
             </div>
           ) : (
-            <motion.ul variants={listVariants} initial="hidden" animate="visible" className="divide-y divide-border">
+            <motion.ul variants={listVariants} initial="hidden" animate="visible" className="divide-y divide-app">
               {upcoming.map((job) => (
-                <motion.li key={job.id} variants={itemVariant} className="flex items-center gap-3 px-5 py-3.5 hover:bg-surface-3 transition-colors">
+                <motion.li key={job.id} variants={itemVariant} className="flex items-center gap-3 px-5 py-3.5 row-hover transition-colors">
                   <Avatar name={job.contacts.name} size="sm" />
                   <div className="flex-1 min-w-0">
-                    <p className="text-sm font-medium text-text-primary truncate">{job.contacts.name}</p>
-                    <p className="text-xs text-text-tertiary truncate">{job.service_type}</p>
+                    <p className="text-sm font-medium text-1 truncate">{job.contacts.name}</p>
+                    <p className="text-xs text-3 truncate">{job.service_type}</p>
                   </div>
                   <div className="text-right flex-shrink-0">
-                    <p className="text-xs text-text-secondary">{formatDate(job.scheduled_date)}</p>
-                    <Badge variant={jobBadge[job.status as JobStatus] ?? 'muted'} className="mt-0.5">
+                    <p className="text-xs text-2">{formatDate(job.scheduled_date)}</p>
+                    <Badge variant={jobBadge[job.status as JobStatus] ?? 'neutral'} className="mt-0.5">
                       {job.status}
                     </Badge>
                   </div>
@@ -127,10 +127,10 @@ export function Dashboard() {
           )}
         </div>
 
-        <div className="lg:col-span-2 bg-surface-2 border border-border rounded-xl overflow-hidden">
-          <div className="flex items-center justify-between px-5 py-4 border-b border-border">
-            <h2 className="text-sm font-semibold text-text-primary">Active Automations</h2>
-            <Link to="/automations" className="flex items-center gap-1 text-xs text-text-tertiary hover:text-text-secondary transition-colors">
+        <div className="lg:col-span-2 bg-raised border border-app rounded-xl overflow-hidden">
+          <div className="flex items-center justify-between px-5 py-4 border-b border-app">
+            <h2 className="text-sm font-semibold text-1">Active Automations</h2>
+            <Link to="/automations" className="flex items-center gap-1 text-xs text-3 hover:text-2 transition-colors">
               View all <ArrowRight size={11} />
             </Link>
           </div>
@@ -141,20 +141,20 @@ export function Dashboard() {
             </div>
           ) : activeAutos.length === 0 ? (
             <div className="flex flex-col items-center py-10">
-              <Zap size={18} className="text-text-disabled mb-2" />
-              <p className="text-sm text-text-tertiary">No active automations</p>
+              <Zap size={18} className="text-4 mb-2" />
+              <p className="text-sm text-3">No active automations</p>
             </div>
           ) : (
-            <motion.ul variants={listVariants} initial="hidden" animate="visible" className="divide-y divide-border">
+            <motion.ul variants={listVariants} initial="hidden" animate="visible" className="divide-y divide-app">
               {activeAutos.map((auto) => (
                 <motion.li key={auto.id} variants={itemVariant} className="px-5 py-3.5">
                   <div className="flex items-start gap-2.5">
-                    <div className="h-5 w-5 rounded-md bg-success-subtle border border-success-muted flex items-center justify-center flex-shrink-0 mt-0.5">
-                      <Zap size={10} className="text-success" />
+                    <div className="h-5 w-5 rounded-md bg-green-subtle flex items-center justify-center flex-shrink-0 mt-0.5">
+                      <Zap size={10} className="text-green" />
                     </div>
                     <div className="min-w-0">
-                      <p className="text-sm font-medium text-text-primary truncate">{auto.name}</p>
-                      <p className="text-xs text-text-tertiary mt-0.5 capitalize">
+                      <p className="text-sm font-medium text-1 truncate">{auto.name}</p>
+                      <p className="text-xs text-3 mt-0.5 capitalize">
                         {auto.trigger.replace(/_/g, ' ')} → {auto.action.replace(/_/g, ' ')}
                       </p>
                     </div>

@@ -2,11 +2,10 @@ import { NavLink, useLocation } from 'react-router-dom'
 import { motion } from 'motion/react'
 import {
   LayoutDashboard, Users, TrendingUp, FileText,
-  Wrench, MessageSquare, Zap, Settings, ChevronRight,
+  Wrench, MessageSquare, Zap, Settings,
 } from 'lucide-react'
 import { useBusiness } from '../../context/BusinessContext'
 import { Avatar } from '../ui/Avatar'
-import { cn } from '../../lib/utils'
 
 const nav = [
   { to: '/', icon: LayoutDashboard, label: 'Dashboard', exact: true },
@@ -23,17 +22,23 @@ export function Sidebar() {
   const location = useLocation()
 
   return (
-    <aside className="flex flex-col w-56 bg-surface-1 border-r border-border h-screen sticky top-0 flex-shrink-0">
-      <div className="px-4 py-5 border-b border-border">
+    <aside
+      className="flex flex-col w-[220px] h-screen sticky top-0 flex-shrink-0"
+      style={{ backgroundColor: 'var(--raised)', borderRight: '1px solid var(--border)' }}
+    >
+      <div className="px-4 py-5" style={{ borderBottom: '1px solid var(--border)' }}>
         <div className="flex items-center gap-2.5">
-          <div className="h-7 w-7 rounded-lg bg-accent flex items-center justify-center flex-shrink-0">
-            <span className="text-white text-xs font-bold">S</span>
+          <div
+            className="h-7 w-7 rounded-lg flex items-center justify-center flex-shrink-0"
+            style={{ backgroundColor: 'var(--brand)' }}
+          >
+            <span className="text-white text-xs font-bold leading-none">S</span>
           </div>
           <div className="min-w-0">
-            <p className="text-xs font-semibold text-text-primary truncate leading-tight">
+            <p className="text-[13px] font-semibold text-1 truncate leading-tight">
               {business?.name ?? 'ServiceCRM'}
             </p>
-            <p className="text-[10px] text-text-tertiary capitalize leading-tight">
+            <p className="text-[11px] text-4 capitalize leading-tight">
               {business?.industry?.replace(/_/g, ' ') ?? '—'}
             </p>
           </div>
@@ -47,40 +52,40 @@ export function Sidebar() {
             <NavLink
               key={to}
               to={to}
-              className={cn(
-                'relative flex items-center gap-2.5 px-2.5 py-2 rounded-md text-sm transition-colors duration-100 group',
-                isActive
-                  ? 'text-text-primary'
-                  : 'text-text-tertiary hover:text-text-secondary hover:bg-surface-2'
-              )}
+              className="relative flex items-center gap-2.5 px-2.5 py-[7px] rounded-md text-[13px] group outline-none"
             >
               {isActive && (
                 <motion.div
                   layoutId="nav-indicator"
-                  className="absolute inset-0 bg-surface-3 rounded-md"
+                  className="absolute inset-0 rounded-md"
+                  style={{ backgroundColor: 'var(--subtle)' }}
                   transition={{ type: 'spring', stiffness: 420, damping: 36 }}
                 />
               )}
-              <Icon size={15} className={cn(
-                'relative z-10 flex-shrink-0',
-                isActive ? 'text-text-primary' : 'text-text-disabled group-hover:text-text-tertiary'
-              )} />
-              <span className="relative z-10 font-medium">{label}</span>
-              {isActive && <ChevronRight size={11} className="relative z-10 ml-auto text-text-disabled" />}
+              <Icon
+                size={15}
+                className="relative z-10 flex-shrink-0 transition-colors duration-100"
+                style={{ color: isActive ? 'var(--fg)' : 'var(--fg-4)' }}
+              />
+              <span
+                className="relative z-10 font-medium transition-colors duration-100"
+                style={{ color: isActive ? 'var(--fg)' : 'var(--fg-3)' }}
+              >
+                {label}
+              </span>
             </NavLink>
           )
         })}
       </nav>
 
-      <div className="px-2 py-3 border-t border-border space-y-0.5">
+      <div className="px-2 py-3 space-y-0.5" style={{ borderTop: '1px solid var(--border)' }}>
         <NavLink
           to="/settings"
-          className={cn(
-            'flex items-center gap-2.5 px-2.5 py-2 rounded-md text-sm',
-            location.pathname === '/settings'
-              ? 'bg-surface-3 text-text-primary'
-              : 'text-text-tertiary hover:text-text-secondary hover:bg-surface-2 transition-colors duration-100'
-          )}
+          className="flex items-center gap-2.5 px-2.5 py-[7px] rounded-md text-[13px] outline-none"
+          style={({ isActive }) => ({
+            backgroundColor: isActive ? 'var(--subtle)' : 'transparent',
+            color: isActive ? 'var(--fg)' : 'var(--fg-3)',
+          })}
         >
           <Settings size={15} className="flex-shrink-0" />
           <span className="font-medium">Settings</span>
@@ -89,7 +94,7 @@ export function Sidebar() {
         {business && (
           <div className="flex items-center gap-2.5 px-2.5 py-2 mt-1">
             <Avatar name={business.name} size="sm" />
-            <p className="text-xs font-medium text-text-secondary truncate">{business.name}</p>
+            <p className="text-[12px] font-medium text-2 truncate">{business.name}</p>
           </div>
         )}
       </div>

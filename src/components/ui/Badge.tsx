@@ -1,7 +1,7 @@
 import { cn } from '../../lib/utils'
 import type { ReactNode } from 'react'
 
-type Variant = 'default' | 'success' | 'warning' | 'danger' | 'muted'
+type Variant = 'default' | 'success' | 'warning' | 'danger' | 'neutral'
 
 interface Props {
   children: ReactNode
@@ -10,17 +10,17 @@ interface Props {
 }
 
 const styles: Record<Variant, string> = {
-  default: 'bg-accent-subtle text-accent border border-accent-muted',
-  success: 'bg-success-subtle text-success border border-success-muted',
-  warning: 'bg-warning-subtle text-warning border border-warning-muted',
-  danger: 'bg-danger-subtle text-danger border border-danger-muted',
-  muted: 'bg-surface-3 text-text-tertiary border border-border',
+  default: 'bg-brand-subtle text-brand-muted',
+  success: 'bg-green-subtle text-green-muted',
+  warning: 'bg-amber-subtle text-amber-muted',
+  danger:  'bg-red-subtle text-red-muted',
+  neutral: 'bg-subtle text-3',
 }
 
-export function Badge({ children, variant = 'default', className }: Props) {
+export function Badge({ children, variant = 'neutral', className }: Props) {
   return (
     <span className={cn(
-      'inline-flex items-center gap-1 px-1.5 py-0.5 text-[10px] font-medium rounded uppercase tracking-wide',
+      'inline-flex items-center gap-1 px-2 py-0.5 text-[11px] font-medium rounded-full',
       styles[variant], className
     )}>
       {children}

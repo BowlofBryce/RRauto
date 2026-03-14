@@ -33,13 +33,13 @@ const actionLabels: Record<string, string> = {
   update_pipeline_stage: 'Update Pipeline',
 }
 
-const triggerColors: Record<string, string> = {
-  lead_created: 'text-blue-400 bg-blue-950 border-blue-900',
-  quote_sent: 'text-amber-400 bg-amber-950 border-amber-900',
-  job_scheduled: 'text-emerald-400 bg-emerald-950 border-emerald-900',
-  job_completed: 'text-teal-400 bg-teal-950 border-teal-900',
-  customer_inactive: 'text-orange-400 bg-orange-950 border-orange-900',
-  missed_call: 'text-red-400 bg-red-950 border-red-900',
+const triggerIconStyle: Record<string, { backgroundColor: string; color: string }> = {
+  lead_created:      { backgroundColor: 'var(--brand-bg)',  color: 'var(--brand)' },
+  quote_sent:        { backgroundColor: 'var(--amber-bg)',  color: 'var(--amber)' },
+  job_scheduled:     { backgroundColor: 'var(--green-bg)',  color: 'var(--green)' },
+  job_completed:     { backgroundColor: 'var(--green-bg)',  color: 'var(--green)' },
+  customer_inactive: { backgroundColor: 'var(--amber-bg)',  color: 'var(--amber)' },
+  missed_call:       { backgroundColor: 'var(--red-bg)',    color: 'var(--red)' },
 }
 
 const cardV = {
@@ -135,7 +135,7 @@ export function Automations() {
         <LayoutGroup>
           {active.length > 0 && (
             <div className="mb-6">
-              <p className="text-[10px] font-semibold text-text-disabled uppercase tracking-widest mb-3 px-1">
+              <p className="text-[10px] font-semibold text-4 uppercase tracking-widest mb-3 px-1">
                 Active — {active.length}
               </p>
               <motion.div layout className="grid grid-cols-1 md:grid-cols-2 gap-3">
@@ -150,7 +150,7 @@ export function Automations() {
 
           {inactive.length > 0 && (
             <div>
-              <p className="text-[10px] font-semibold text-text-disabled uppercase tracking-widest mb-3 px-1">
+              <p className="text-[10px] font-semibold text-4 uppercase tracking-widest mb-3 px-1">
                 Paused — {inactive.length}
               </p>
               <motion.div layout className="grid grid-cols-1 md:grid-cols-2 gap-3 opacity-60">
@@ -175,21 +175,21 @@ export function Automations() {
           />
           <div className="grid grid-cols-2 gap-3">
             <div className="flex flex-col gap-1.5">
-              <label className="text-xs font-medium text-text-secondary">Trigger</label>
+              <label className="text-xs font-medium text-2">Trigger</label>
               <select
                 value={form.trigger}
                 onChange={(e) => setForm({ ...form, trigger: e.target.value })}
-                className="h-8 px-3 rounded-md text-sm text-text-primary bg-surface-3 border border-border focus:outline-none focus:ring-1 focus:ring-accent focus:border-accent transition-colors"
+                className="input-base h-8 px-3 rounded-lg text-[13px] focus:outline-none"
               >
                 {Object.entries(triggerLabels).map(([k, v]) => <option key={k} value={k}>{v}</option>)}
               </select>
             </div>
             <div className="flex flex-col gap-1.5">
-              <label className="text-xs font-medium text-text-secondary">Action</label>
+              <label className="text-xs font-medium text-2">Action</label>
               <select
                 value={form.action}
                 onChange={(e) => setForm({ ...form, action: e.target.value })}
-                className="h-8 px-3 rounded-md text-sm text-text-primary bg-surface-3 border border-border focus:outline-none focus:ring-1 focus:ring-accent focus:border-accent transition-colors"
+                className="input-base h-8 px-3 rounded-lg text-[13px] focus:outline-none"
               >
                 {Object.entries(actionLabels).map(([k, v]) => <option key={k} value={k}>{v}</option>)}
               </select>
@@ -203,15 +203,15 @@ export function Automations() {
             placeholder="0 = immediate"
           />
           <div className="flex flex-col gap-1.5">
-            <label className="text-xs font-medium text-text-secondary">Message *</label>
+            <label className="text-xs font-medium text-2">Message *</label>
             <textarea
               value={form.message}
               onChange={(e) => setForm({ ...form, message: e.target.value })}
               rows={3}
               placeholder={'Use {{contact.name}}, {{business.name}}, etc.'}
-              className="px-3 py-2 rounded-md text-sm text-text-primary bg-surface-3 border border-border placeholder:text-text-disabled focus:outline-none focus:ring-1 focus:ring-accent focus:border-accent transition-colors resize-none font-mono text-xs"
+              className="input-base px-3 py-2 rounded-lg text-[13px] resize-none font-mono focus:outline-none"
             />
-            <p className="text-[10px] text-text-disabled">
+            <p className="text-[10px] text-4">
               {'Variables: {{contact.name}} {{business.name}} {{job.service_type}}'}
             </p>
           </div>
@@ -233,7 +233,7 @@ interface CardProps {
 }
 
 function AutoCard({ automation, index, onToggle, onDelete }: CardProps) {
-  const accent = triggerColors[automation.trigger] ?? 'text-text-tertiary bg-surface-3 border-border'
+  const iconStyle = triggerIconStyle[automation.trigger] ?? { backgroundColor: 'var(--subtle)', color: 'var(--fg-3)' }
   const cfg = automation.action_config as Record<string, string>
 
   return (
@@ -244,16 +244,17 @@ function AutoCard({ automation, index, onToggle, onDelete }: CardProps) {
       initial="hidden"
       animate="visible"
       exit="exit"
-      className="bg-surface-2 border border-border rounded-xl p-4 group hover:border-border-strong transition-colors"
+      className="bg-raised rounded-xl p-4 group transition-colors"
+      style={{ border: '1px solid var(--border)' }}
     >
       <div className="flex items-start justify-between mb-3">
         <div className="flex items-center gap-2.5">
-          <div className={`h-7 w-7 rounded-lg border flex items-center justify-center flex-shrink-0 ${accent}`}>
+          <div className="h-7 w-7 rounded-lg flex items-center justify-center flex-shrink-0" style={iconStyle}>
             <Zap size={12} />
           </div>
           <div className="min-w-0">
-            <p className="text-sm font-semibold text-text-primary leading-tight">{automation.name}</p>
-            <p className="text-[11px] text-text-disabled capitalize mt-0.5">
+            <p className="text-sm font-semibold text-1 leading-tight">{automation.name}</p>
+            <p className="text-[11px] text-4 capitalize mt-0.5">
               {automation.trigger.replace(/_/g, ' ')}
             </p>
           </div>
@@ -261,13 +262,13 @@ function AutoCard({ automation, index, onToggle, onDelete }: CardProps) {
         <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
           <button
             onClick={() => onToggle(automation.id, automation.is_active)}
-            className="p-1.5 rounded text-text-disabled hover:text-text-secondary hover:bg-surface-3 transition-colors"
+            className="p-1.5 rounded text-4 hover:text-2 hover:bg-subtle transition-colors"
           >
             {automation.is_active ? <Pause size={12} /> : <Play size={12} />}
           </button>
           <button
             onClick={() => onDelete(automation.id)}
-            className="p-1.5 rounded text-text-disabled hover:text-danger hover:bg-danger-subtle transition-colors"
+            className="p-1.5 rounded text-4 hover:text-red hover:bg-red-subtle transition-colors"
           >
             <Trash2 size={12} />
           </button>
@@ -275,24 +276,24 @@ function AutoCard({ automation, index, onToggle, onDelete }: CardProps) {
       </div>
 
       <div className="flex items-center gap-1.5 flex-wrap mb-3">
-        <Badge variant="muted">{triggerLabels[automation.trigger] ?? automation.trigger}</Badge>
-        <ArrowRight size={10} className="text-text-disabled flex-shrink-0" />
+        <Badge variant="neutral">{triggerLabels[automation.trigger] ?? automation.trigger}</Badge>
+        <ArrowRight size={10} className="text-4 flex-shrink-0" />
         {automation.delay_minutes > 0 && (
           <>
-            <span className="flex items-center gap-1 text-[10px] text-text-disabled">
+            <span className="flex items-center gap-1 text-[10px] text-4">
               <Clock size={9} />
               {automation.delay_minutes >= 60 ? `${automation.delay_minutes / 60}h` : `${automation.delay_minutes}m`} delay
             </span>
-            <ArrowRight size={10} className="text-text-disabled flex-shrink-0" />
+            <ArrowRight size={10} className="text-4 flex-shrink-0" />
           </>
         )}
-        <Badge variant={automation.is_active ? 'success' : 'muted'}>
+        <Badge variant={automation.is_active ? 'success' : 'neutral'}>
           {actionLabels[automation.action] ?? automation.action}
         </Badge>
       </div>
 
       {cfg.message && (
-        <p className="text-[11px] text-text-tertiary bg-surface-3 rounded px-3 py-2 line-clamp-2 font-mono leading-relaxed">
+        <p className="text-[11px] text-3 bg-subtle rounded px-3 py-2 line-clamp-2 font-mono leading-relaxed">
           {cfg.message}
         </p>
       )}

@@ -43,13 +43,13 @@ export function Communications() {
         title="Inbox"
         description={`${comms.length} messages`}
         actions={
-          <div className="flex items-center gap-0.5 bg-surface-3 rounded-lg p-0.5">
+          <div className="flex items-center gap-0.5 bg-subtle rounded-lg p-0.5">
             {(['all', 'sms', 'email'] as Filter[]).map((f) => (
               <button
                 key={f}
                 onClick={() => setFilter(f)}
                 className={`px-3 py-1 text-xs font-medium rounded-md transition-colors capitalize ${
-                  filter === f ? 'bg-surface-5 text-text-primary shadow-card' : 'text-text-tertiary hover:text-text-secondary'
+                  filter === f ? 'bg-raised text-1 shadow-app-sm' : 'text-3 hover:text-2'
                 }`}
               >
                 {f}
@@ -59,13 +59,13 @@ export function Communications() {
         }
       />
 
-      <div className="bg-surface-2 border border-border rounded-xl overflow-hidden">
+      <div className="bg-raised border border-app rounded-xl overflow-hidden">
         {loading ? (
           <TableSkeleton rows={6} />
         ) : filtered.length === 0 ? (
           <EmptyState icon={MessageSquare} title="No messages" description="Communications will appear here once sent or received" />
         ) : (
-          <motion.ul layout className="divide-y divide-border">
+          <motion.ul layout className="divide-y divide-app">
             <AnimatePresence initial={false}>
               {filtered.map((c, i) => (
                 <motion.li
@@ -75,32 +75,32 @@ export function Communications() {
                   initial="hidden"
                   animate="visible"
                   layout
-                  className="flex items-start gap-4 px-5 py-4 hover:bg-surface-3 transition-colors"
+                  className="flex items-start gap-4 px-5 py-4 row-hover transition-colors"
                 >
                   <Avatar name={c.contacts.name} size="sm" className="mt-0.5 flex-shrink-0" />
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-2 mb-1">
-                      <span className="text-sm font-medium text-text-primary">{c.contacts.name}</span>
-                      <span className="flex items-center gap-0.5 text-[10px] text-text-disabled">
+                      <span className="text-sm font-medium text-1">{c.contacts.name}</span>
+                      <span className="flex items-center gap-0.5 text-[10px] text-4">
                         {c.direction === 'sent'
-                          ? <ArrowUpRight size={9} className="text-success" />
-                          : <ArrowDownLeft size={9} className="text-accent" />
+                          ? <ArrowUpRight size={9} className="text-green" />
+                          : <ArrowDownLeft size={9} className="text-brand" />
                         }
                         {c.direction}
                       </span>
                       {c.automation_id && (
-                        <span className="flex items-center gap-0.5 text-[10px] text-text-disabled">
+                        <span className="flex items-center gap-0.5 text-[10px] text-4">
                           <Zap size={9} />auto
                         </span>
                       )}
                     </div>
-                    <p className="text-sm text-text-secondary leading-relaxed line-clamp-2">{c.message}</p>
+                    <p className="text-sm text-2 leading-relaxed line-clamp-2">{c.message}</p>
                   </div>
                   <div className="flex flex-col items-end gap-1.5 flex-shrink-0">
                     <Badge variant={c.type === 'sms' ? 'success' : 'default'}>
                       {c.type === 'sms' ? <><MessageSquare size={8} />SMS</> : <><Mail size={8} />Email</>}
                     </Badge>
-                    <span className="text-[11px] text-text-disabled">{formatRelative(c.sent_at)}</span>
+                    <span className="text-[11px] text-4">{formatRelative(c.sent_at)}</span>
                   </div>
                 </motion.li>
               ))}

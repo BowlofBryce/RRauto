@@ -16,8 +16,8 @@ export function PageHeader({ title, description, actions }: Props) {
       className="flex items-start justify-between pb-6"
     >
       <div>
-        <h1 className="text-lg font-semibold text-text-primary">{title}</h1>
-        {description && <p className="text-sm text-text-tertiary mt-0.5">{description}</p>}
+        <h1 className="text-[17px] font-semibold text-1 tracking-tight">{title}</h1>
+        {description && <p className="text-[13px] text-3 mt-0.5">{description}</p>}
       </div>
       {actions && <div className="flex items-center gap-2">{actions}</div>}
     </motion.div>

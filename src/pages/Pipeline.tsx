@@ -113,16 +113,16 @@ export function Pipeline() {
               >
                 <div className="flex items-center gap-2 mb-3 px-1">
                   <div className="h-2 w-2 rounded-full flex-shrink-0" style={{ backgroundColor: stage.color }} />
-                  <span className="text-[10px] font-semibold text-text-secondary uppercase tracking-widest">
+                  <span className="text-[10px] font-semibold text-2 uppercase tracking-widest">
                     {stage.name}
                   </span>
-                  <span className="ml-auto text-xs text-text-disabled tabular-nums">{stageLeads.length}</span>
+                  <span className="ml-auto text-xs text-4 tabular-nums">{stageLeads.length}</span>
                 </div>
 
                 <motion.div
                   layout
                   className={`min-h-28 rounded-xl space-y-2 p-1.5 transition-colors duration-150 ${
-                    isOver ? 'bg-surface-3 ring-1 ring-border-strong' : 'bg-surface-1'
+                    isOver ? 'bg-subtle' : 'bg-app'
                   }`}
                 >
                   <AnimatePresence>
@@ -139,22 +139,22 @@ export function Pipeline() {
                         onDragEnd={() => { setDragging(null); setDragOver(null) }}
                         whileHover={{ y: -1 }}
                         whileTap={{ scale: 0.98 }}
-                        className={`bg-surface-2 border border-border rounded-lg p-3 cursor-grab active:cursor-grabbing select-none transition-shadow hover:shadow-card ${
+                        className={`bg-raised border border-app rounded-lg p-3 cursor-grab active:cursor-grabbing select-none transition-shadow hover:shadow-app-sm ${
                           dragging === lead.id ? 'opacity-40' : ''
                         }`}
                       >
                         <div className="flex items-start gap-2">
                           <Avatar name={lead.contacts.name} size="sm" />
                           <div className="flex-1 min-w-0">
-                            <p className="text-xs font-semibold text-text-primary truncate">{lead.contacts.name}</p>
+                            <p className="text-xs font-semibold text-1 truncate">{lead.contacts.name}</p>
                             {lead.contacts.phone && (
-                              <p className="text-[11px] text-text-disabled truncate mt-0.5">{lead.contacts.phone}</p>
+                              <p className="text-[11px] text-4 truncate mt-0.5">{lead.contacts.phone}</p>
                             )}
                           </div>
                         </div>
                         <div className="flex items-center justify-between mt-2.5">
-                          <Badge variant="muted">{lead.source}</Badge>
-                          <span className="flex items-center gap-1 text-[10px] text-text-disabled">
+                          <Badge variant="neutral">{lead.source}</Badge>
+                          <span className="flex items-center gap-1 text-[10px] text-4">
                             <Clock size={9} />{formatRelative(lead.created_at)}
                           </span>
                         </div>
@@ -164,7 +164,7 @@ export function Pipeline() {
 
                   {stageLeads.length === 0 && (
                     <div className="flex items-center justify-center h-14">
-                      <p className="text-xs text-text-disabled">Drop leads here</p>
+                      <p className="text-xs text-4">Drop leads here</p>
                     </div>
                   )}
                 </motion.div>
@@ -177,11 +177,11 @@ export function Pipeline() {
       <Modal open={addOpen} onClose={() => setAddOpen(false)} title="Add Lead">
         <div className="space-y-3">
           <div className="flex flex-col gap-1.5">
-            <label className="text-xs font-medium text-text-secondary">Contact *</label>
+            <label className="text-xs font-medium text-2">Contact *</label>
             <select
               value={form.contact_id}
               onChange={(e) => setForm({ ...form, contact_id: e.target.value })}
-              className="h-8 px-3 rounded-md text-sm text-text-primary bg-surface-3 border border-border focus:outline-none focus:ring-1 focus:ring-accent focus:border-accent transition-colors"
+              className="input-base h-8 px-3 rounded-lg text-[13px] focus:outline-none"
             >
               <option value="">Select contact...</option>
               {contacts.map((c) => <option key={c.id} value={c.id}>{c.name}</option>)}
@@ -189,21 +189,21 @@ export function Pipeline() {
           </div>
           <div className="grid grid-cols-2 gap-3">
             <div className="flex flex-col gap-1.5">
-              <label className="text-xs font-medium text-text-secondary">Source</label>
+              <label className="text-xs font-medium text-2">Source</label>
               <select
                 value={form.source}
                 onChange={(e) => setForm({ ...form, source: e.target.value })}
-                className="h-8 px-3 rounded-md text-sm text-text-primary bg-surface-3 border border-border focus:outline-none focus:ring-1 focus:ring-accent focus:border-accent transition-colors"
+                className="input-base h-8 px-3 rounded-lg text-[13px] focus:outline-none"
               >
                 {sources.map((s) => <option key={s.value} value={s.value}>{s.label}</option>)}
               </select>
             </div>
             <div className="flex flex-col gap-1.5">
-              <label className="text-xs font-medium text-text-secondary">Stage</label>
+              <label className="text-xs font-medium text-2">Stage</label>
               <select
                 value={form.pipeline_stage_id}
                 onChange={(e) => setForm({ ...form, pipeline_stage_id: e.target.value })}
-                className="h-8 px-3 rounded-md text-sm text-text-primary bg-surface-3 border border-border focus:outline-none focus:ring-1 focus:ring-accent focus:border-accent transition-colors"
+                className="input-base h-8 px-3 rounded-lg text-[13px] focus:outline-none"
               >
                 {stages.map((s) => <option key={s.id} value={s.id}>{s.name}</option>)}
               </select>

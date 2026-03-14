@@ -17,10 +17,10 @@ import type { JobWithContact } from '../modules/jobs/jobs.service'
 import type { Contact } from '../types/crm.types'
 
 type StatusKey = 'completed' | 'scheduled' | 'pending' | 'cancelled' | 'in_progress'
-const statusCfg: Record<StatusKey, { variant: 'success' | 'warning' | 'muted' | 'danger'; label: string }> = {
+const statusCfg: Record<StatusKey, { variant: 'success' | 'warning' | 'neutral' | 'danger'; label: string }> = {
   completed: { variant: 'success', label: 'Completed' },
   scheduled: { variant: 'warning', label: 'Scheduled' },
-  pending: { variant: 'muted', label: 'Pending' },
+  pending: { variant: 'neutral', label: 'Pending' },
   cancelled: { variant: 'danger', label: 'Cancelled' },
   in_progress: { variant: 'warning', label: 'In Progress' },
 }
@@ -88,24 +88,24 @@ export function Jobs() {
         }
       />
 
-      <div className="bg-surface-2 border border-border rounded-xl overflow-hidden">
+      <div className="bg-raised border border-app rounded-xl overflow-hidden">
         {loading ? (
           <TableSkeleton rows={5} />
         ) : jobs.length === 0 ? (
           <EmptyState icon={Wrench} title="No jobs yet" description="Schedule your first job" action={{ label: 'New Job', onClick: () => setAddOpen(true) }} />
         ) : (
           <>
-            <div className="grid grid-cols-[40px_1fr_130px_80px_140px] gap-4 px-5 py-2.5 border-b border-border">
+            <div className="grid grid-cols-[40px_1fr_130px_80px_140px] gap-4 px-5 py-2.5 border-b border-app">
               <div />
-              <div className="text-[10px] font-semibold text-text-disabled uppercase tracking-wider">Contact</div>
-              <div className="text-[10px] font-semibold text-text-disabled uppercase tracking-wider">Date</div>
-              <div className="text-[10px] font-semibold text-text-disabled uppercase tracking-wider text-right">Price</div>
-              <div className="text-[10px] font-semibold text-text-disabled uppercase tracking-wider">Status</div>
+              <div className="text-[10px] font-semibold text-4 uppercase tracking-wider">Contact</div>
+              <div className="text-[10px] font-semibold text-4 uppercase tracking-wider">Date</div>
+              <div className="text-[10px] font-semibold text-4 uppercase tracking-wider text-right">Price</div>
+              <div className="text-[10px] font-semibold text-4 uppercase tracking-wider">Status</div>
             </div>
-            <motion.ul layout className="divide-y divide-border">
+            <motion.ul layout className="divide-y divide-app">
               <AnimatePresence initial={false}>
                 {jobs.map((job, i) => {
-                  const cfg = statusCfg[job.status as StatusKey] ?? { variant: 'muted' as const, label: job.status }
+                  const cfg = statusCfg[job.status as StatusKey] ?? { variant: 'neutral' as const, label: job.status }
                   return (
                     <motion.li
                       key={job.id}
@@ -115,33 +115,33 @@ export function Jobs() {
                       animate="visible"
                       exit="exit"
                       layout
-                      className="grid grid-cols-[40px_1fr_130px_80px_140px] gap-4 items-center px-5 py-3.5 hover:bg-surface-3 transition-colors"
+                      className="grid grid-cols-[40px_1fr_130px_80px_140px] gap-4 items-center px-5 py-3.5 row-hover transition-colors"
                     >
                       <Avatar name={job.contacts.name} size="sm" />
                       <div className="min-w-0">
-                        <p className="text-sm font-medium text-text-primary truncate">{job.contacts.name}</p>
-                        <p className="text-xs text-text-tertiary truncate flex items-center gap-1 mt-0.5">
+                        <p className="text-sm font-medium text-1 truncate">{job.contacts.name}</p>
+                        <p className="text-xs text-3 truncate flex items-center gap-1 mt-0.5">
                           <Wrench size={10} />{job.service_type}
                         </p>
                       </div>
                       <div>
                         {job.scheduled_date ? (
-                          <span className="flex items-center gap-1 text-xs text-text-secondary">
+                          <span className="flex items-center gap-1 text-xs text-2">
                             <Calendar size={10} />{formatDate(job.scheduled_date)}
                           </span>
                         ) : (
-                          <span className="text-xs text-text-disabled">Unscheduled</span>
+                          <span className="text-xs text-4">Unscheduled</span>
                         )}
                       </div>
                       <div className="text-right">
-                        <span className="text-sm font-medium text-text-primary tabular-nums">{formatCurrency(job.price)}</span>
+                        <span className="text-sm font-medium text-1 tabular-nums">{formatCurrency(job.price)}</span>
                       </div>
                       <div className="flex items-center gap-2">
                         <Badge variant={cfg.variant}>{cfg.label}</Badge>
                         <select
                           value={job.status}
                           onChange={(e) => handleStatus(job.id, e.target.value)}
-                          className="text-xs bg-transparent border-0 focus:outline-none text-text-disabled cursor-pointer"
+                          className="text-xs bg-transparent border-0 focus:outline-none text-4 cursor-pointer"
                         >
                           {Object.entries(statusCfg).map(([k, v]) => (
                             <option key={k} value={k}>{v.label}</option>
@@ -160,9 +160,9 @@ export function Jobs() {
       <Modal open={addOpen} onClose={() => setAddOpen(false)} title="New Job">
         <div className="space-y-3">
           <div className="flex flex-col gap-1.5">
-            <label className="text-xs font-medium text-text-secondary">Contact *</label>
+            <label className="text-xs font-medium text-2">Contact *</label>
             <select value={form.contact_id} onChange={(e) => setForm({ ...form, contact_id: e.target.value })}
-              className="h-8 px-3 rounded-md text-sm text-text-primary bg-surface-3 border border-border focus:outline-none focus:ring-1 focus:ring-accent focus:border-accent transition-colors">
+              className="input-base h-8 px-3 rounded-lg text-[13px] focus:outline-none">
               <option value="">Select contact...</option>
               {contacts.map((c) => <option key={c.id} value={c.id}>{c.name}</option>)}
             </select>

@@ -1,0 +1,299 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>CRM Sign In</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: #f1f5f9;
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #1e293b;
+    }
+
+    .card {
+      background: #fff;
+      border-radius: 12px;
+      box-shadow: 0 4px 24px rgba(0,0,0,0.08), 0 1px 4px rgba(0,0,0,0.04);
+      padding: 40px;
+      width: 100%;
+      max-width: 400px;
+    }
+
+    .logo {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 32px;
+    }
+
+    .logo-icon {
+      width: 36px;
+      height: 36px;
+      background: #0ea5e9;
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .logo-icon svg { width: 20px; height: 20px; }
+
+    .logo-text {
+      font-size: 18px;
+      font-weight: 700;
+      color: #0f172a;
+      letter-spacing: -0.3px;
+    }
+
+    h1 {
+      font-size: 22px;
+      font-weight: 700;
+      color: #0f172a;
+      margin-bottom: 6px;
+      letter-spacing: -0.3px;
+    }
+
+    .subtitle {
+      font-size: 14px;
+      color: #64748b;
+      margin-bottom: 28px;
+    }
+
+    label {
+      display: block;
+      font-size: 13px;
+      font-weight: 600;
+      color: #374151;
+      margin-bottom: 6px;
+    }
+
+    input {
+      width: 100%;
+      padding: 10px 14px;
+      border: 1.5px solid #e2e8f0;
+      border-radius: 8px;
+      font-size: 14px;
+      color: #1e293b;
+      background: #f8fafc;
+      transition: border-color 0.15s, box-shadow 0.15s;
+      outline: none;
+      margin-bottom: 16px;
+    }
+
+    input:focus {
+      border-color: #0ea5e9;
+      box-shadow: 0 0 0 3px rgba(14,165,233,0.12);
+      background: #fff;
+    }
+
+    button[type="submit"] {
+      width: 100%;
+      padding: 11px;
+      background: #0ea5e9;
+      color: #fff;
+      border: none;
+      border-radius: 8px;
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background 0.15s, transform 0.1s;
+      margin-top: 4px;
+    }
+
+    button[type="submit"]:hover { background: #0284c7; }
+    button[type="submit"]:active { transform: scale(0.98); }
+    button[type="submit"]:disabled { background: #94a3b8; cursor: not-allowed; }
+
+    .error {
+      background: #fef2f2;
+      border: 1px solid #fecaca;
+      color: #b91c1c;
+      border-radius: 8px;
+      padding: 10px 14px;
+      font-size: 13px;
+      margin-bottom: 16px;
+      display: none;
+    }
+
+    .success {
+      background: #f0fdf4;
+      border: 1px solid #bbf7d0;
+      color: #15803d;
+      border-radius: 8px;
+      padding: 10px 14px;
+      font-size: 13px;
+      margin-bottom: 16px;
+      display: none;
+    }
+
+    .divider {
+      border: none;
+      border-top: 1px solid #f1f5f9;
+      margin: 24px 0;
+    }
+
+    .test-creds {
+      background: #f8fafc;
+      border: 1px solid #e2e8f0;
+      border-radius: 8px;
+      padding: 14px;
+    }
+
+    .test-creds-title {
+      font-size: 12px;
+      font-weight: 600;
+      color: #64748b;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      margin-bottom: 8px;
+    }
+
+    .cred-row {
+      display: flex;
+      justify-content: space-between;
+      font-size: 13px;
+      margin-bottom: 4px;
+    }
+
+    .cred-label { color: #94a3b8; }
+    .cred-value { color: #1e293b; font-weight: 500; font-family: monospace; }
+
+    .fill-btn {
+      margin-top: 10px;
+      width: 100%;
+      padding: 7px;
+      background: transparent;
+      border: 1.5px solid #cbd5e1;
+      border-radius: 6px;
+      font-size: 12px;
+      font-weight: 600;
+      color: #475569;
+      cursor: pointer;
+      transition: border-color 0.15s, color 0.15s;
+    }
+
+    .fill-btn:hover { border-color: #0ea5e9; color: #0ea5e9; }
+  </style>
+</head>
+<body>
+  <div class="card">
+    <div class="logo">
+      <div class="logo-icon">
+        <svg fill="none" viewBox="0 0 24 24" stroke="white" stroke-width="2">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z"/>
+        </svg>
+      </div>
+      <span class="logo-text">CRM</span>
+    </div>
+
+    <h1>Sign in</h1>
+    <p class="subtitle">Access your business dashboard</p>
+
+    <div class="error" id="errorMsg"></div>
+    <div class="success" id="successMsg"></div>
+
+    <form id="loginForm">
+      <label for="email">Email</label>
+      <input type="email" id="email" name="email" placeholder="you@example.com" required autocomplete="email" />
+
+      <label for="password">Password</label>
+      <input type="password" id="password" name="password" placeholder="••••••••" required autocomplete="current-password" />
+
+      <button type="submit" id="submitBtn">Sign in</button>
+    </form>
+
+    <hr class="divider" />
+
+    <div class="test-creds">
+      <div class="test-creds-title">Test Credentials</div>
+      <div class="cred-row">
+        <span class="cred-label">Email</span>
+        <span class="cred-value">test@mybusiness.com</span>
+      </div>
+      <div class="cred-row">
+        <span class="cred-label">Password</span>
+        <span class="cred-value">TestPass123!</span>
+      </div>
+      <button class="fill-btn" onclick="fillTestCreds()">Use test credentials</button>
+    </div>
+  </div>
+
+  <script>
+    const SUPABASE_URL = '__SUPABASE_URL__';
+    const SUPABASE_ANON_KEY = '__SUPABASE_ANON_KEY__';
+
+    function fillTestCreds() {
+      document.getElementById('email').value = 'test@mybusiness.com';
+      document.getElementById('password').value = 'TestPass123!';
+    }
+
+    document.getElementById('loginForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const btn = document.getElementById('submitBtn');
+      const errorEl = document.getElementById('errorMsg');
+      const successEl = document.getElementById('successMsg');
+
+      errorEl.style.display = 'none';
+      successEl.style.display = 'none';
+      btn.disabled = true;
+      btn.textContent = 'Signing in...';
+
+      const email = document.getElementById('email').value;
+      const password = document.getElementById('password').value;
+
+      try {
+        const res = await fetch(`${SUPABASE_URL}/auth/v1/token?grant_type=password`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'apikey': SUPABASE_ANON_KEY,
+          },
+          body: JSON.stringify({ email, password }),
+        });
+
+        const data = await res.json();
+
+        if (!res.ok) {
+          throw new Error(data.error_description || data.message || 'Invalid credentials');
+        }
+
+        const token = data.access_token;
+
+        const bizRes = await fetch(`${SUPABASE_URL}/rest/v1/business_users?select=business_id&limit=1`, {
+          headers: {
+            'apikey': SUPABASE_ANON_KEY,
+            'Authorization': `Bearer ${token}`,
+          },
+        });
+
+        const bizData = await bizRes.json();
+
+        if (!bizRes.ok || !bizData.length) {
+          throw new Error('No business linked to this account');
+        }
+
+        const businessId = bizData[0].business_id;
+
+        sessionStorage.setItem('crm_token', token);
+        sessionStorage.setItem('crm_business_id', businessId);
+
+        successEl.textContent = 'Signed in! Business ID: ' + businessId;
+        successEl.style.display = 'block';
+        btn.textContent = 'Signed in';
+      } catch (err) {
+        errorEl.textContent = err.message;
+        errorEl.style.display = 'block';
+        btn.disabled = false;
+        btn.textContent = 'Sign in';
+      }
+    });
+  </script>
+</body>
+</html>

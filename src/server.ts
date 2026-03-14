@@ -1,6 +1,6 @@
 import "dotenv/config";
 import express from "express";
-import { readFileSync } from "fs";
+import { existsSync } from "fs";
 import { join, dirname } from "path";
 import { fileURLToPath } from "url";
 import { withAuthOrBusinessScope } from "./shared/auth-middleware.js";
@@ -17,32 +17,9 @@ const __dirname = dirname(fileURLToPath(import.meta.url));
 const app = express();
 app.use(express.json());
 
-app.use(express.static(join(__dirname, "public")));
-
 app.get("/health", (_req, res) => {
   res.json({ ok: true });
 });
-
-app.get("/", (_req, res) => {
-  res.redirect("/login");
-});
-
-app.get("/login", (_req, res) => {
-  const html = readFileSync(join(__dirname, "public/login.html"), "utf8")
-    .replace("__SUPABASE_URL__", process.env.VITE_SUPABASE_URL ?? "")
-    .replace("__SUPABASE_ANON_KEY__", process.env.VITE_SUPABASE_ANON_KEY ?? "");
-  res.setHeader("Content-Type", "text/html");
-  res.send(html);
-});
-
-const uiPages = ["dashboard", "contacts-ui", "leads-ui", "jobs-ui", "quotes-ui", "pipeline-ui", "communications-ui", "automations-ui"];
-
-for (const page of uiPages) {
-  app.get(`/${page}`, (_req, res) => {
-    res.setHeader("Content-Type", "text/html");
-    res.sendFile(join(__dirname, `public/${page}.html`));
-  });
-}
 
 app.use(withAuthOrBusinessScope);
 
@@ -53,6 +30,14 @@ app.use("/quotes", quotesRouter);
 app.use("/communications", communicationsRouter);
 app.use("/automations", automationsRouter);
 app.use("/pipeline", pipelineRouter);
+
+const clientDist = join(__dirname, "../dist-client");
+if (existsSync(clientDist)) {
+  app.use(express.static(clientDist));
+  app.get("*", (_req, res) => {
+    res.sendFile(join(clientDist, "index.html"));
+  });
+}
 
 app.use((error: Error, _req: express.Request, res: express.Response, _next: express.NextFunction) => {
   console.error(error);
